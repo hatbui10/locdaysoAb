@@ -113,19 +113,19 @@ function processData(){
   data.sort((a,b)=>Number(a)-Number(b));
   data2.sort((a,b)=>Number(a)-Number(b));
 
-  const finalJson = `{
-  "data": [
+  const finalJson = `const data = {
+  data: [
 
 ${groupAndFormat(data)}
 
   ],
 
-  "data2": [
+  data2: [
 
 ${groupAndFormat(data2)}
 
   ]
-}`;
+};`;
 
   document.getElementById("output").textContent = finalJson;
 
