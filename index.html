@@ -2,147 +2,115 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Dynamic Slot Matrix</title>
-
+<title>Format JSON Theo Nhóm</title>
 <style>
-body {
-  background: #111;
-  color: white;
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 30px;
+body{
+  font-family: Arial;
+  background:#111;
+  color:#fff;
+  padding:20px;
 }
-
-.controls {
-  margin-bottom: 20px;
+textarea{
+  width:100%;
+  height:250px;
+  margin-bottom:20px;
+  padding:10px;
+  border-radius:8px;
+  font-size:14px;
 }
-
-.grid {
-  display: grid;
-  gap: 15px;
-  justify-content: center;
-  margin-bottom: 30px;
+button{
+  padding:10px 20px;
+  font-weight:bold;
+  cursor:pointer;
 }
-
-.wheel {
-  width: 50px;
-  height: 60px;
-  overflow: hidden;
-  border-radius: 8px;
-  background: #1e1e1e;
-  border: 1px solid #333;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-}
-
-.number {
-  height: 60px;
-  line-height: 60px;
-  font-size: 40px;
-  color: #ffffff;
-}
-
-.number {
-  height: 60px;
-  line-height: 60px;
-  font-size: 24px;
-}
-
-.highlight {
-  color: #00ffcc;
-  font-weight: bold;
-  text-shadow: 0 0 8px #00ffcc;
-}
-
-input {
-  width: 60px;
-  padding: 5px;
-  margin: 0 5px;
-}
-
-button {
-  padding: 6px 15px;
-  cursor: pointer;
+pre{
+  background:#222;
+  padding:15px;
+  border-radius:8px;
+  overflow-x:auto;
+  white-space:pre;
 }
 </style>
 </head>
-
 <body>
 
-<h2>Slot Matrix Tùy Chỉnh</h2>
+<h2>Dán JSON vào đây</h2>
+<textarea id="input"></textarea>
+<button onclick="processData()">Chuẩn hóa</button>
 
-<div class="controls">
-  Hàng: <input type="number" id="rows" value="10" min="1">
-  Cột: <input type="number" id="cols" value="10" min="1">
-  <button onclick="createGrid()">Tạo Lưới</button>
-  <button onclick="spinAll()">Random</button>
-</div>
-
-<div class="grid" id="grid"></div>
+<h2>Kết quả</h2>
+<pre id="output"></pre>
 
 <script>
-const grid = document.getElementById("grid");
-
-function createGrid() {
-  const rows = parseInt(document.getElementById("rows").value);
-  const cols = parseInt(document.getElementById("cols").value);
-
-  grid.innerHTML = "";
-  grid.style.gridTemplateColumns = `repeat(${cols}, 50px)`;
-
-  for (let i = 0; i < rows * cols; i++) {
-    const wheel = document.createElement("div");
-    wheel.className = "wheel";
-
-    const numbers = document.createElement("div");
-    numbers.className = "numbers";
-
-    for (let r = 0; r < 6; r++) {
-      for (let n = 0; n <= 9; n++) {
-        const div = document.createElement("div");
-        div.className = "number";
-        div.innerText = n;
-        numbers.appendChild(div);
-      }
-    }
-
-    wheel.appendChild(numbers);
-    grid.appendChild(wheel);
-  }
+function extractNumbers(str){
+  return str.match(/\d{3}/g) || [];
 }
 
-function spinAll() {
-  const wheels = document.querySelectorAll(".numbers");
+function groupAndFormat(arr){
+  const groups = {};
 
-  wheels.forEach((wheel, index) => {
-
-    wheel.querySelectorAll(".number").forEach(n => {
-      n.classList.remove("highlight");
-    });
-
-    const randomNumber = Math.floor(Math.random() * 10);
-    const baseRounds = 50;
-    const offset = (baseRounds + randomNumber) * 60;
-
-    wheel.style.transition = "none";
-    wheel.style.transform = "translateY(0px)";
-
-    setTimeout(() => {
-      wheel.style.transition = "transform 1.6s cubic-bezier(0.2,0.8,0.2,1)";
-      wheel.style.transform = `translateY(-${offset}px)`;
-    }, 20 + index * 3);
-
-    setTimeout(() => {
-      const numbers = wheel.querySelectorAll(".number");
-      numbers[baseRounds + randomNumber].classList.add("highlight");
-    }, 1600 + index * 3);
+  arr.forEach(num=>{
+    const prefix = num[0];
+    if(!groups[prefix]) groups[prefix]=[];
+    groups[prefix].push(num);
   });
+
+  let result = "";
+  Object.keys(groups).sort().forEach(prefix=>{
+    result += "    ";
+    result += groups[prefix]
+      .sort((a,b)=>Number(a)-Number(b))
+      .map(n=>`"${n}"`)
+      .join(",");
+    result += ",\n\n";
+  });
+
+  return result.trim().replace(/,$/,"");
 }
 
-// Tạo mặc định khi load trang
-createGrid();
+function processData(){
+
+  const raw = document.getElementById("input").value;
+  const allNumbers = extractNumbers(raw);
+
+  let unique = [...new Set(allNumbers)];
+  unique.sort((a,b)=>Number(a)-Number(b));
+
+  // Tách 2 nhóm theo mẫu có sẵn trong JSON gốc
+  const dataMatch = raw.match(/"data"\s*:\s*\[(.*?)\]/s);
+  const data2Match = raw.match(/"data2"\s*:\s*\[(.*?)\]/s);
+
+  if(!dataMatch || !data2Match){
+    document.getElementById("output").textContent="Không tìm thấy data hoặc data2";
+    return;
+  }
+
+  let data = [...new Set(extractNumbers(dataMatch[1]))];
+  let data2 = [...new Set(extractNumbers(data2Match[1]))];
+
+  // loại trùng giữa 2
+  data2 = data2.filter(n=>!data.includes(n));
+
+  data.sort((a,b)=>Number(a)-Number(b));
+  data2.sort((a,b)=>Number(a)-Number(b));
+
+  const finalJson = `{
+  "data": [
+
+${groupAndFormat(data)}
+
+  ],
+
+  "data2": [
+
+${groupAndFormat(data2)}
+
+  ]
+}`;
+
+  document.getElementById("output").textContent = finalJson;
+}
 </script>
 
 </body>
 </html>
-
-
