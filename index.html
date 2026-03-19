@@ -165,7 +165,7 @@ function processFile() {
   reader.onload = function(event) {
     const text = event.target.result;
 
-    const numbers = text.match(/\\d+/g) || [];
+    const numbers = text.match(/\d+/g) || [];
 
     const filtered = numbers.filter(num => num.startsWith(filterValue));
 
