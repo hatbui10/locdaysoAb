@@ -169,9 +169,7 @@ function processFile() {
 
     const filtered = numbers
   .filter(num => num.startsWith(filterValue))
-  .map(Number)          // chuyển sang số
-  .sort((a, b) => a - b) // sắp xếp tăng dần
-  .map(String);         // chuyển lại về chuỗi
+  .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));         // chuyển lại về chuỗi
 
     
     let lines = [];
