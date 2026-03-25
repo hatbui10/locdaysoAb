@@ -92,6 +92,11 @@ button {
          id="filterInput"
          placeholder="Nhập số"
          maxlength="2">
+         
+         <div id="abResult" class="output-box" style="height:80px;color:#00ffcc;">
+  Kết quả AB sẽ hiện ở đây...
+</div>
+
 
   <button onclick="processFile()">🔍 Lọc & Tách</button>
   <button onclick="copyResult()">📋 Copy</button>
@@ -150,11 +155,77 @@ function processFile() {
       }
     }
   });
+  
+  
+  
+  // ====== XỬ LÝ AB ======
+let patterns = [];
+
+uniqueNumbers.forEach(num => {
+  if (num.includes(keyword)) {
+    const index = num.indexOf(keyword);
+    const after = num.substring(index + keyword.length);
+
+    if (after.length >= 4) {
+      const first4 = after.slice(0,4);
+      const ab = first4.split('').map(x => x < 5 ? 'a' : 'b').join('');
+      patterns.push(ab);
+    }
+  }
+});
+
+// loại trùng
+patterns = [...new Set(patterns)];
+
+// tất cả khả năng
+const allAB = [
+  "aaaa","aaab","aaba","aabb",
+  "abaa","abab","abba","abbb",
+  "baaa","baab","baba","babb",
+  "bbaa","bbab","bbba","bbbb"
+];
+
+// check điều kiện “đụng hết”
+function isValid(p, arr){
+  return arr.every(target => {
+    for(let i=0;i<4;i++){
+      if(p[i] === target[i]) return true;
+    }
+    return false;
+  });
+}
+
+let found = allAB.filter(p => isValid(p, patterns));
+
+// hiển thị
+let abBox = document.getElementById("abResult");
+if (abBox) {
+  abBox.innerText = found.length
+    ? "Pattern hợp lệ:\n" + found.join("  ")
+    : "Không có pattern phù hợp";
+}
+
 
   finalText = textResult.trim();
   output.innerHTML = htmlResult || "Không tìm thấy số nào có phần phía sau.";
   document.getElementById("status").innerText = `Tìm thấy ${count} kết quả cho "${keyword}"`;
 }
+
+
+function toAB(str){
+  return str.split('').map(x => x < 5 ? 'a' : 'b').join('');
+}
+
+// kiểm tra 1 pattern có match hết không
+function isValidPattern(p, patterns){
+  return patterns.every(target => {
+    for(let i = 0; i < 4; i++){
+      if(p[i] === target[i]) return true;
+    }
+    return false;
+  });
+}
+
 
 function copyResult() {
   if (!finalText) return;
