@@ -83,7 +83,9 @@ button {
   <h2 style="text-align:center">🔢 Lọc & Tách Số Sau</h2>
 
   <input type="file" id="fileInput" accept=".txt">
-  <div id="output" class="output-box">Kết quả sẽ hiện ở đây...</div>
+  <div id="abResult" class="output-box" style="height:100px;color:#00ffcc;">
+    Kết quả AB sẽ hiện ở đây...
+  </div>
 
   <input type="tel" id="filterInput" placeholder="Nhập số" maxlength="2">
 
@@ -93,11 +95,9 @@ button {
 
   <div id="status" class="info-text">Chưa có dữ liệu</div>
 
-  
-  <div id="abResult" class="output-box" style="height:100px;color:#00ffcc;">
-    Kết quả AB sẽ hiện ở đây...
+  <div id="output" class="output-box">Kết quả sẽ hiện ở đây...</div>
+
   </div>
-</div>
 
 <script>
 let uniqueNumbers = [];
