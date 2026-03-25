@@ -217,12 +217,15 @@ function toAB(str){
 }
 
 // kiểm tra 1 pattern có match hết không
-function isValidPattern(p, patterns){
-  return patterns.every(target => {
+function isValid(p, arr){
+  return arr.every(target => {
+    let matchCount = 0;
+
     for(let i = 0; i < 4; i++){
-      if(p[i] === target[i]) return true;
+      if(p[i] === target[i]) matchCount++;
     }
-    return false;
+
+    return matchCount >= 2; // 👈 chỗ quan trọng
   });
 }
 
