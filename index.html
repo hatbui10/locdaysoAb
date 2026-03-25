@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sắp xếp & Gom nhóm số (Cửa sổ trượt 8 số)</title>
+    <title>Sắp xếp & Tách 8 số (2-6)</title>
     <style>
         body {
             margin: 0; padding: 20px; min-height: 100vh;
@@ -34,6 +34,8 @@
             padding: 30px; box-sizing: border-box; line-height: 1.8;
             font-family: 'Consolas', monospace; font-size: 16px;
             resize: none; outline: none;
+            /* CĂN GIỮA NỘI DUNG */
+            text-align: center;
         }
         #status { font-size: 13px; color: #aaa; margin-top: 10px; text-align: center; }
     </style>
@@ -42,7 +44,7 @@
 
 <div class="container">
     <div class="controls">
-        <label for="fileInput" class="btn-upload">📁 Tải File</label>
+        <label for="fileInput" class="btn-upload">📁 Tải File Mới</label>
         <input type="file" id="fileInput" accept=".txt">
         <div class="row">
             <button onclick="toOneColumn()" class="btn-run">⚡ Gom cột</button>
@@ -59,13 +61,28 @@
     const dataBox = document.getElementById("dataBox");
     const status = document.getElementById("status");
 
+    // TỰ ĐỘNG KHÔI PHỤC DỮ LIỆU KHI LOAD TRANG
+    window.onload = () => {
+        const savedData = localStorage.getItem("savedNumbers");
+        if (savedData) {
+            dataBox.value = savedData;
+            status.innerText = "Đã khôi phục dữ liệu từ phiên trước.";
+        }
+    };
+
+    // Hàm lưu dữ liệu vào localStorage
+    function saveData() {
+        localStorage.setItem("savedNumbers", dataBox.value);
+    }
+
     document.getElementById("fileInput").addEventListener("change", e => {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = e => {
             dataBox.value = e.target.result;
-            status.innerText = "Đã nhận file.";
+            saveData(); // Lưu ngay khi tải file
+            status.innerText = "Đã nhận file mới và lưu vào bộ nhớ.";
         };
         reader.readAsText(file);
     });
@@ -73,6 +90,7 @@
     function toOneColumn() {
         let numbers = dataBox.value.match(/\d+/g) || [];
         dataBox.value = numbers.join("\n");
+        saveData();
         status.innerText = "Đã đưa về 1 cột.";
     }
 
@@ -83,27 +101,24 @@
         // 1. Lọc trùng và chỉ lấy số có độ dài chính xác 10 chữ số
         let uniqueTenDigits = [...new Set(numbers)].filter(n => n.length === 10);
 
-        // 2. Thực hiện tách theo kiểu cửa sổ trượt (Sliding Window) để lấy các dãy 8 số
+        // 2. Logic Cửa sổ trượt (Sliding Window)
         let eightDigitSet = new Set();
         uniqueTenDigits.forEach(num => {
-            // Với 10 chữ số, ta lấy được 3 dãy 8 chữ số: [0-8], [1-9], [2-10]
             eightDigitSet.add(num.substring(0, 8));
             eightDigitSet.add(num.substring(1, 9));
             eightDigitSet.add(num.substring(2, 10));
         });
 
-        // Chuyển set về array để sắp xếp
         let sortedEightDigits = Array.from(eightDigitSet).sort((a, b) => a.localeCompare(b));
 
-        // 3. Định dạng thành 2 - 6 và gom nhóm
+        // 3. Định dạng và gom nhóm
         let finalResult = [];
         let lastPrefix = "";
 
         sortedEightDigits.forEach(num => {
-            let prefix = num.substring(0, 2); // 2 số đầu
-            let middle = num.substring(2);    // 6 số còn lại
+            let prefix = num.substring(0, 2);
+            let middle = num.substring(2);
 
-            // Nếu đổi đầu số (2 số đầu) thì cách ra 1 dòng để tạo khối
             if (lastPrefix !== "" && prefix !== lastPrefix) {
                 finalResult.push(""); 
             }
@@ -113,7 +128,10 @@
         });
 
         dataBox.value = finalResult.join("\n");
-        status.innerText = `Đã tách từ ${uniqueTenDigits.length} số gốc thành các dãy 8 số.`;
+        saveData(); // Lưu kết quả sau khi xử lý
+
+        // HIỂN THỊ BỘ ĐẾM KIỂM TRA ĐỘ CHÍNH XÁC
+        status.innerText = `Gốc: ${uniqueTenDigits.length} số -> Tạo ra: ${eightDigitSet.size} dãy 8 số duy nhất.`;
         dataBox.scrollTop = 0;
     }
 
