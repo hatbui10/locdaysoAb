@@ -2,137 +2,170 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Trình Quét Số Chuyên Nghiệp</title>
+    <title>So Sánh Đối Nghịch Tuyệt Đối (Cả 6 Số)</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; background: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; max-width: 900px; margin: 20px auto; padding: 20px; background: #f0f2f5; }
         .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .input-group { margin-bottom: 15px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #333; }
-        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
-        button { flex: 1; min-width: 120px; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; margin: 20px 0; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .btn-run { background: #007bff; color: white; }
-        .btn-down { background: #28a745; color: white; display: none; } /* Ẩn mặc định */
-        .btn-clear { background: #6c757d; color: white; }
+        .btn-down { background: #28a745; color: white; display: none; }
+        
         #output { 
             margin-top: 20px; 
-            white-space: pre-wrap; 
-            background: #2d3436; 
-            color: #fab1a0; 
+            background: #ffffff; 
+            color: #333; 
             padding: 20px; 
             border-radius: 6px; 
-            height: 400px; 
+            max-height: 600px; 
             overflow-y: auto;
-            line-height: 2.8; /* Khoảng cách thưa 2 dòng */
+            border: 2px solid #ccc;
+            line-height: 1.1; /* Sát nhau tối đa */
             font-family: 'Courier New', monospace;
-            border: 2px solid #000;
+            font-size: 19px;
+            letter-spacing: 2px;
         }
-        .status { font-size: 0.9em; padding: 8px; border-radius: 4px; margin-top: 5px; background: #e8f0fe; color: #1967d2; }
+        .line { white-space: nowrap; margin-bottom: 1px; }
+        .target-digit { color: #ff4757; font-weight: bold; }
+        .highlight-seq { background-color: #ffff00; font-weight: bold; color: #000; } /* Màu vàng tươi */
+        .status { color: #007bff; font-size: 0.9em; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Trình Quét & Tách Dãy Số</h2>
+    <h2>Quét Số: Đối Nghịch Cả Cụm 6 Số</h2>
     
     <div class="input-group">
-        <label>1. Chọn tệp số của bạn (.txt):</label>
+        <label>1. Chọn tệp số (.txt):</label>
         <input type="file" id="fileInput" accept=".txt">
-        <div id="fileStatus" class="status">Chưa có dữ liệu.</div>
+        <div id="fileStatus" class="status">Sẵn sàng.</div>
     </div>
 
     <div class="input-group">
-        <label>2. Nhập số bắt đầu (0-9):</label>
+        <label>2. Số bắt đầu (0-9):</label>
         <input type="number" id="targetNum" min="0" max="9" value="0">
     </div>
 
     <div class="btn-group">
-        <button class="btn-run" onclick="processData()">BẮT ĐẦU QUÉT</button>
-        <button id="downBtn" class="btn-down" onclick="downloadTxt()">TẢI VỀ FILE (.TXT)</button>
-        <button class="btn-clear" onclick="clearStorage()">XÓA BỘ NHỚ</button>
+        <button class="btn-run" onclick="processData()">QUÉT & SO SÁNH</button>
+        <button id="downBtn" class="btn-down" onclick="downloadTxt()">TẢI FILE (.TXT)</button>
     </div>
 
-    <div id="output">Kết quả sẽ hiển thị tại đây...</div>
+    <div id="output">Kết quả hiển thị tại đây...</div>
 </div>
 
 <script>
-    let finalOutput = "";
-    const KEY = 'user_data_numbers';
+    let finalRawText = "";
+    const KEY = 'numeric_storage_v5';
 
-    // Tự động load dữ liệu cũ khi mở trang
-    window.onload = () => {
-        const saved = localStorage.getItem(KEY);
-        if (saved) {
-            document.getElementById('fileStatus').textContent = "Đã nhận diện dữ liệu cũ (" + saved.length + " ký tự). Bấm Quét để chạy.";
+    // Hàm kiểm tra 1 cặp số có đối nghịch không (>=5 vs <5)
+    function checkOpp(d1, d2) {
+        if (!d1 || !d2) return false;
+        const n1 = parseInt(d1);
+        const n2 = parseInt(d2);
+        return (n1 >= 5 && n2 < 5) || (n1 < 5 && n2 >= 5);
+    }
+
+    // Hàm kiểm tra TOÀN BỘ 6 vị trí có đối nghịch không
+    function isFullSixOpposite(lineA, lineB) {
+        if (!lineA || !lineB) return false;
+        // Kiểm tra từ index 1 đến 6
+        for (let pos = 1; pos <= 6; pos++) {
+            if (!checkOpp(lineA[pos], lineB[pos])) {
+                return false; // Chỉ cần 1 vị trí KHÔNG đối nghịch là loại ngay
+            }
         }
-    };
-
-    function clearStorage() {
-        localStorage.removeItem(KEY);
-        location.reload();
+        return true; // Tất cả 6 vị trí đều đối nghịch
     }
 
     function processData() {
         const fileInput = document.getElementById('fileInput');
-        const output = document.getElementById('output');
-
         if (fileInput.files[0]) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const content = e.target.result.replace(/[^0-9]/g, ''); // Chỉ lấy số
+                const content = e.target.result.replace(/[^0-9]/g, '');
                 localStorage.setItem(KEY, content);
-                runFilter(content);
+                executeLogic(content);
             };
             reader.readAsText(fileInput.files[0]);
         } else {
             const saved = localStorage.getItem(KEY);
-            if (saved) runFilter(saved);
-            else alert("Vui lòng chọn file trước!");
+            if (saved) executeLogic(saved);
+            else alert("Vui lòng chọn file!");
         }
     }
 
-    function runFilter(data) {
+    function executeLogic(data) {
         const target = document.getElementById('targetNum').value.toString();
-        const downBtn = document.getElementById('downBtn');
-        let results = [];
+        const output = document.getElementById('output');
+        let lines = [];
         let i = 0;
 
+        // Chia tệp thành các dòng theo logic cũ
         while (i < data.length) {
-            // Tìm số mục tiêu
             let start = data.indexOf(target, i);
             if (start === -1) break;
-
-            // Tìm số mục tiêu kế tiếp, bắt đầu từ vị trí cách ít nhất 7 số (số hiện tại + 6 số tiếp theo)
             let nextPos = data.indexOf(target, start + 7);
-
             if (nextPos !== -1) {
-                results.push(data.substring(start, nextPos));
-                i = nextPos; // Nhảy đến số vừa tìm được để tiếp tục vòng lặp
+                lines.push(data.substring(start, nextPos));
+                i = nextPos;
             } else {
-                // Nếu không còn số mục tiêu nào sau đó, lấy phần còn lại (nếu đủ dài)
                 let lastChunk = data.substring(start);
-                if (lastChunk.length >= 7) results.push(lastChunk);
+                if (lastChunk.length >= 7) lines.push(lastChunk);
                 break;
             }
         }
 
-        if (results.length > 0) {
-            finalOutput = results.join('\n'); // Xuống dòng thưa
-            document.getElementById('output').textContent = finalOutput;
-            downBtn.style.display = "inline-block";
-            document.getElementById('fileStatus').textContent = "Tìm thấy " + results.length + " dãy thỏa mãn.";
-        } else {
-            document.getElementById('output').textContent = "Không tìm thấy dãy nào bắt đầu bằng '" + target + "' và có độ dài phía sau ít nhất 6 số.";
-            downBtn.style.display = "none";
+        output.innerHTML = "";
+        finalRawText = lines.join('\n');
+
+        for (let n = 0; n < lines.length; n++) {
+            let currentLine = lines[n];
+            let nextLine = lines[n + 1];
+            let prevLine = lines[n - 1];
+            
+            // Một dòng được bôi vàng nếu nó đối nghịch hoàn toàn với dòng TRƯỚC nó HOẶC dòng SAU nó
+            let shouldHighlight = isFullSixOpposite(currentLine, nextLine) || isFullSixOpposite(currentLine, prevLine);
+
+            const lineDiv = document.createElement('div');
+            lineDiv.className = 'line';
+
+            // Hiển thị số đầu tiên
+            const s1 = document.createElement('span');
+            s1.className = 'target-digit';
+            s1.textContent = currentLine[0];
+            lineDiv.appendChild(s1);
+
+            // Hiển thị cụm 6 số xét duyệt
+            const s2 = document.createElement('span');
+            s2.textContent = currentLine.substring(1, 7);
+            if (shouldHighlight) s2.className = 'highlight-seq';
+            lineDiv.appendChild(s2);
+
+            // Hiển thị các số dư còn lại của dòng
+            if (currentLine.length > 7) {
+                const s3 = document.createElement('span');
+                s3.textContent = currentLine.substring(7);
+                lineDiv.appendChild(s3);
+            }
+
+            output.appendChild(lineDiv);
         }
+        
+        document.getElementById('downBtn').style.display = (lines.length > 0) ? "inline-block" : "none";
+        document.getElementById('fileStatus').textContent = "Đã xử lý " + lines.length + " dòng.";
     }
 
     function downloadTxt() {
-        const blob = new Blob([finalOutput], { type: 'text/plain' });
+        const blob = new Blob([finalRawText], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = "ket_qua_loc_so.txt";
+        a.download = "ket_qua_doi_nghich.txt";
         a.click();
     }
 </script>
