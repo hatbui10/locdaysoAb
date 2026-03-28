@@ -117,7 +117,7 @@
         }
 
         if (results.length > 0) {
-            finalOutput = results.join('\n\n\n'); // Xuống dòng thưa
+            finalOutput = results.join('\n'); // Xuống dòng thưa
             document.getElementById('output').textContent = finalOutput;
             downBtn.style.display = "inline-block";
             document.getElementById('fileStatus').textContent = "Tìm thấy " + results.length + " dãy thỏa mãn.";
