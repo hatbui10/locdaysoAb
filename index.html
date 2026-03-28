@@ -2,147 +2,115 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sắp xếp & Tách 8 số (2-6)</title>
+    <title>Quét Số & Cắt Dãy Thông Minh</title>
     <style>
-        body {
-            margin: 0; padding: 20px; min-height: 100vh;
-            background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
-            color: #ffffff; font-family: 'Segoe UI', sans-serif;
-            display: flex; justify-content: center;
+        body { font-family: 'Segoe UI', sans-serif; max-width: 800px; margin: 30px auto; padding: 20px; background: #f0f2f5; }
+        .box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .btn-group { display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-run { background: #007bff; color: white; }
+        .btn-down { background: #28a745; color: white; display: none; }
+        #output { 
+            margin-top: 20px; 
+            white-space: pre-wrap; 
+            background: #1e1e1e; 
+            color: #dcdcdc; 
+            padding: 20px; 
+            border-radius: 6px; 
+            height: 400px; 
+            overflow-y: auto;
+            line-height: 1.8; /* Tạo độ thưa cho dòng */
         }
-        .container { width: 100%; max-width: 550px; display: flex; flex-direction: column; }
-        .controls { width: 100%; display: flex; flex-direction: column; gap: 10px; }
-        .row { display: flex; gap: 10px; width: 100%; }
-        
-        button, .btn-upload {
-            flex: 1; padding: 14px; border-radius: 12px; font-weight: bold;
-            border: none; cursor: pointer; transition: 0.2s;
-            text-align: center; font-size: 14px;
-        }
-        .btn-upload { background: #4b6cb7; color: white; display: block; }
-        .btn-run { background: #6c5ce7; color: white; }
-        .btn-sort { background: #00b894; color: white; }
-        .btn-export { background: #e17055; color: white; margin-top: 10px; }
-        
-        button:hover { filter: brightness(1.2); transform: translateY(-1px); }
-        #fileInput { display: none; }
-
-        textarea {
-            width: 100%; height: 65vh; margin-top: 15px; border-radius: 15px;
-            background: rgba(0, 0, 0, 0.3); color: #00ffcc; border: 1px solid #444;
-            padding: 30px; box-sizing: border-box; line-height: 1.8;
-            font-family: 'Consolas', monospace; font-size: 16px;
-            resize: none; outline: none;
-            /* CĂN GIỮA NỘI DUNG */
-            text-align: center;
-        }
-        #status { font-size: 13px; color: #aaa; margin-top: 10px; text-align: center; }
+        .info { color: #666; font-size: 0.9em; margin-top: 5px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="controls">
-        <label for="fileInput" class="btn-upload">📁 Tải File Mới</label>
+<div class="box">
+    <h2>Trình Quét & Tách Dãy Số</h2>
+    
+    <div class="input-group">
+        <label>1. Chọn tệp dữ liệu số (.txt):</label>
         <input type="file" id="fileInput" accept=".txt">
-        <div class="row">
-            <button onclick="toOneColumn()" class="btn-run">⚡ Gom cột</button>
-            <button onclick="processData()" class="btn-sort">🔢 Tách 8 số (2-6)</button>
-        </div>
-        <button onclick="exportTxt()" class="btn-export">💾 Xuất File .txt</button>
     </div>
 
-    <textarea id="dataBox" placeholder="Kết quả hiển thị tại đây..."></textarea>
-    <div id="status">Sẵn sàng</div>
+    <div class="input-group">
+        <label>2. Nhập số cần tìm (0-9):</label>
+        <input type="number" id="targetNum" min="0" max="9" value="0">
+        <p class="info">* Sau khi tìm thấy số này, hệ thống sẽ lấy ít nhất 6 ký tự tiếp theo rồi mới cắt dòng.</p>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-run" onclick="scanNumbers()">Bắt đầu quét</button>
+        <button id="downBtn" class="btn-down" onclick="downloadTxt()">Tải tệp kết quả</button>
+    </div>
+
+    <div id="output">Kết quả hiển thị tại đây...</div>
 </div>
 
 <script>
-    const dataBox = document.getElementById("dataBox");
-    const status = document.getElementById("status");
+    let finalResult = "";
 
-    // TỰ ĐỘNG KHÔI PHỤC DỮ LIỆU KHI LOAD TRANG
-    window.onload = () => {
-        const savedData = localStorage.getItem("savedNumbers");
-        if (savedData) {
-            dataBox.value = savedData;
-            status.innerText = "Đã khôi phục dữ liệu từ phiên trước.";
+    function scanNumbers() {
+        const fileInput = document.getElementById('fileInput');
+        const target = document.getElementById('targetNum').value;
+        const output = document.getElementById('output');
+        const downBtn = document.getElementById('downBtn');
+
+        if (!fileInput.files[0]) {
+            alert("Vui lòng chọn tệp!");
+            return;
         }
-    };
 
-    // Hàm lưu dữ liệu vào localStorage
-    function saveData() {
-        localStorage.setItem("savedNumbers", dataBox.value);
-    }
-
-    document.getElementById("fileInput").addEventListener("change", e => {
-        const file = e.target.files[0];
-        if (!file) return;
         const reader = new FileReader();
-        reader.onload = e => {
-            dataBox.value = e.target.result;
-            saveData(); // Lưu ngay khi tải file
-            status.innerText = "Đã nhận file mới và lưu vào bộ nhớ.";
-        };
-        reader.readAsText(file);
-    });
+        reader.onload = function(e) {
+            // Loại bỏ tất cả khoảng trắng, xuống dòng để có 1 dãy số thuần túy
+            const rawText = e.target.result.replace(/\s+/g, '');
+            let resultArr = [];
+            let currentIndex = 0;
 
-    function toOneColumn() {
-        let numbers = dataBox.value.match(/\d+/g) || [];
-        dataBox.value = numbers.join("\n");
-        saveData();
-        status.innerText = "Đã đưa về 1 cột.";
-    }
+            while (currentIndex < rawText.length) {
+                // Tìm vị trí của số mục tiêu tiếp theo kể từ vị trí hiện tại
+                let foundIndex = rawText.indexOf(target, currentIndex);
 
-    function processData() {
-        let raw = dataBox.value;
-        let numbers = raw.match(/\d+/g) || [];
+                if (foundIndex === -1) break; // Không tìm thấy nữa thì dừng
 
-        // 1. Lọc trùng và chỉ lấy số có độ dài chính xác 10 chữ số
-        let uniqueTenDigits = [...new Set(numbers)].filter(n => n.length === 10);
+                // Kiểm tra xem phần còn lại có đủ ít nhất 1 số mục tiêu + 6 số phía sau không
+                // Độ dài tối thiểu cần lấy là 7 (số đó + 6 số sau)
+                let endOfSegment = foundIndex + 7;
+                
+                // Tìm số mục tiêu kế tiếp NHƯNG phải sau ít nhất 6 ký tự
+                let nextSearchStart = foundIndex + 7;
+                let nextTargetIndex = rawText.indexOf(target, nextSearchStart);
 
-        // 2. Logic Cửa sổ trượt (Sliding Window)
-        let eightDigitSet = new Set();
-        uniqueTenDigits.forEach(num => {
-            eightDigitSet.add(num.substring(0, 8));
-            eightDigitSet.add(num.substring(1, 9));
-            eightDigitSet.add(num.substring(2, 10));
-        });
-
-        let sortedEightDigits = Array.from(eightDigitSet).sort((a, b) => a.localeCompare(b));
-
-        // 3. Định dạng và gom nhóm
-        let finalResult = [];
-        let lastPrefix = "";
-
-        sortedEightDigits.forEach(num => {
-            let prefix = num.substring(0, 2);
-            let middle = num.substring(2);
-
-            if (lastPrefix !== "" && prefix !== lastPrefix) {
-                finalResult.push(""); 
+                if (nextTargetIndex !== -1) {
+                    // Nếu tìm thấy số tiếp theo, cắt đến tận vị trí đó
+                    resultArr.push(rawText.substring(foundIndex, nextTargetIndex));
+                    currentIndex = nextTargetIndex;
+                } else {
+                    // Nếu không còn số nào nữa, lấy hết phần còn lại
+                    resultArr.push(rawText.substring(foundIndex));
+                    break;
+                }
             }
 
-            finalResult.push(`${prefix} - ${middle}`);
-            lastPrefix = prefix;
-        });
-
-        dataBox.value = finalResult.join("\n");
-        saveData(); // Lưu kết quả sau khi xử lý
-
-        // HIỂN THỊ BỘ ĐẾM KIỂM TRA ĐỘ CHÍNH XÁC
-        status.innerText = `Gốc: ${uniqueTenDigits.length} số -> Tạo ra: ${eightDigitSet.size} dãy 8 số duy nhất.`;
-        dataBox.scrollTop = 0;
+            // Ghi kết quả với 2 lần xuống dòng (\n\n) để tạo khoảng cách thưa
+            finalResult = resultArr.join('\n\'); 
+            output.textContent = finalResult || "Không tìm thấy dãy thỏa mãn điều kiện.";
+            downBtn.style.display = finalResult ? "block" : "none";
+        };
+        reader.readAsText(fileInput.files[0]);
     }
 
-    function exportTxt() {
-        const content = dataBox.value;
-        if (!content.trim()) return;
-        const blob = new Blob([content], { type: "text/plain" });
+    function downloadTxt() {
+        const blob = new Blob([finalResult], { type: 'text/plain' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
+        const a = document.createElement('a');
         a.href = url;
-        a.download = "ket_qua_tach_8so.txt";
+        a.download = "ket_qua_quet_so.txt";
         a.click();
         URL.revokeObjectURL(url);
     }
