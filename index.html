@@ -9,7 +9,6 @@
             max-width: 1100px; 
             margin: 0 auto; 
             padding: 20px; 
-            /* Nền Gradient Đen Sâu */
             background: linear-gradient(135deg, #000000 0%, #1a1a1d 50%, #0b0b0b 100%); 
             background-attachment: fixed; 
             min-height: 100vh; 
@@ -17,7 +16,7 @@
         }
 
         .box { 
-            background: #111111; /* Đen nhám */
+            background: #111111; 
             padding: 25px; 
             border-radius: 12px; 
             box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
@@ -29,7 +28,6 @@
         h2 { color: #66fcf1; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
 
         .input-group { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
-        
         label { display: block; font-weight: bold; margin-bottom: 10px; color: #45a29e; }
         
         input[type="file"] { 
@@ -49,7 +47,6 @@
         
         .btn-down { background: #28a745; color: white; display: none; }
         
-        /* Bảng hiển thị kết quả - Chế độ tập trung cao */
         #output { 
             margin-top: 20px; 
             background: #050505; 
@@ -74,17 +71,24 @@
             font-size: 22px; 
             font-weight: bold;
             border-left: 4px solid #45a29e;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
 
         .line { white-space: nowrap; margin-bottom: 4px; border-bottom: 1px solid #111; }
-        
         .target-digit { color: #0b0b0b; font-weight: bold; background: #c5c6c7; padding: 0 6px; border-radius: 2px; margin-right: 5px; }
         
-        /* Logic màu sắc giữ nguyên để nhận diện nhưng chỉnh lại sắc độ tối */
-        .q-bg-red { background-color: white !important; color: red !important; } /* Đỏ đô tối */
-        .q-bg-blue { background-color: #002b5c !important; color: #ffffff !important; } /* Xanh biển cực tối */
-        .q-bg-yellow { background-color: #b8860b !important; color: #000000 !important; font-weight: bold; } /* Vàng đồng tối */
+        /* LOGIC MÀU SẮC VÀ GẠCH NGANG */
+        .q-bg-red { background-color: white !important; color: red !important; }
+        
+        .q-bg-blue { 
+            background-color: #002b5c !important; 
+            color: #ffffff !important; 
+            /* Gạch ngang 0.2px */
+            text-decoration: line-through;
+            text-decoration-color: #ffffff;
+            text-decoration-thickness: 0.2px;
+        }
+        
+        .q-bg-yellow { background-color: #b8860b !important; color: #000000 !important; font-weight: bold; }
         
         .status { color: #66fcf1; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
 
@@ -105,8 +109,8 @@
     <h2>Phân Tích Khối 0-9 (Dark Edition)</h2>
     <div class="legend">
         <strong>Chế độ hiển thị tối ưu:</strong><br>
-        - <span style="background:#8b0000; color:white; padding:1px 4px">Đỏ Đô</span>: Cụm Q ≥ 5 | 
-        - <span style="background:#002b5c; color:white; padding:1px 4px">Xanh Than</span>: Cụm Q < 5<br>
+        - <span style="background:white; color:red; padding:1px 4px">Trắng-Đỏ</span>: Cụm Q ≥ 5 | 
+        - <span style="background:#002b5c; color:white; padding:1px 4px; text-decoration: line-through;">Xanh-Gạch</span>: Cụm Q < 5 (Gạch ngang 0.2px)<br>
         - <span style="background:#b8860b; color:black; padding:1px 4px">Vàng Đồng</span>: Đối nghịch 100% dòng kề.
     </div>
     
@@ -125,7 +129,6 @@
 </div>
 
 <script>
-    // GIỮ NGUYÊN TOÀN BỘ LOGIC JAVASCRIPT CỦA BẠN
     let finalRawText = "";
     const KEY = 'block_analysis_v8';
 
