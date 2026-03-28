@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phân Tích Khối - Xuất Ảnh & PDF</title>
+    <title>Phân Tích Số Theo Khối - Ultra Dark Mode - Toàn bộ Ảnh</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { 
@@ -10,91 +10,147 @@
             max-width: 1100px; 
             margin: 0 auto; 
             padding: 20px; 
-            background: #000; 
+            background: linear-gradient(135deg, #000000 0%, #1a1a1d 50%, #0b0b0b 100%); 
+            background-attachment: fixed; 
+            min-height: 100vh; 
             color: #c5c6c7; 
         }
 
         .box { 
-            background: #111; 
+            background: #111111; 
             padding: 25px; 
             border-radius: 12px; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
+            color: #c5c6c7; 
+            margin-top: 20px;
             border: 1px solid #222;
         }
 
-        h2 { color: #66fcf1; text-align: center; text-transform: uppercase; }
+        h2 { color: #66fcf1; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
+
+        .input-group { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
+        
+        input[type="file"] { 
+            width: 100%; padding: 12px; 
+            border: 1px dashed #333; 
+            border-radius: 6px; 
+            background: #0b0b0b; 
+            color: #66fcf1;
+            cursor: pointer;
+        }
 
         .btn-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; min-width: 150px; }
+        button { flex: 1; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; min-width: 150px;}
         
         .btn-run { background: #1f2833; color: #66fcf1; border: 1px solid #66fcf1; }
         .btn-run:hover { background: #66fcf1; color: #0b0b0b; }
         
-        .btn-img { background: #ffc107; color: #000; display: none; } /* Nút chụp ảnh */
+        /* Nút Chụp Ảnh */
+        .btn-img { background: #ffc107; color: #000; display: none; }
+        .btn-img:hover { background: #e0a800; }
+
         .btn-down { background: #28a745; color: white; display: none; }
+        .btn-down:hover { background: #218838; }
         
+        /* Bảng hiển thị kết quả */
         #output { 
             margin-top: 20px; 
             background: #050505; 
             padding: 20px; 
             border-radius: 8px; 
+            /* CÀI ĐẶT THANH CUỘN */
+            max-height: 800px; 
+            overflow-y: auto; 
             border: 1px solid #333;
             line-height: 1.2; 
             font-family: 'Courier New', monospace;
             font-size: 20px; 
+            letter-spacing: 2px;
             color: #00ff41; 
+        }
+
+        /* Thêm một khung bao bên ngoài để trợ giúp chụp ảnh */
+        #output-capture-container {
+            width: 100%;
         }
 
         .block-header { 
             background: #1a1a1a; 
             color: #45a29e; 
-            padding: 10px; 
-            margin: 30px 0 10px 0; 
+            padding: 12px; 
+            margin: 35px 0 12px 0; 
+            border-radius: 4px; 
             font-size: 22px; 
             font-weight: bold;
             border-left: 4px solid #45a29e;
         }
 
-        .line { white-space: nowrap; margin-bottom: 4px; border-bottom: 1px solid #111; }
-        .target-digit { color: #0b0b0b; font-weight: bold; background: #c5c6c7; padding: 0 6px; border-radius: 2px; margin-right: 5px; }
+        .line { white-space: nowrap; margin-bottom: 4px; border-bottom: 1px solid #111; display: flex; align-items: center;}
         
-        /* MÀU SẮC & GẠCH NGANG 0.2px */
-        .q-bg-red { background-color: white !important; color: red !important; }
+        .target-digit { color: #0b0b0b; font-weight: bold; background: #c5c6c7; padding: 0 6px; border-radius: 2px; margin-right: 5px; display: inline-block; min-width: 1ch; text-align: center;}
+        
+        .q-bg-red { background-color: white !important; color: red !important; } 
+        
         .q-bg-blue { 
             background-color: #002b5c !important; 
             color: #ffffff !important; 
+            /* Gạch ngang 0.2px */
             text-decoration: line-through;
             text-decoration-color: #ffffff;
             text-decoration-thickness: 0.2px;
         }
+        
         .q-bg-yellow { background-color: #b8860b !important; color: #000000 !important; font-weight: bold; }
         
-        .status { color: #66fcf1; font-weight: bold; margin-top: 10px; }
+        .status { color: #66fcf1; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
+
+        .legend { 
+            font-size: 13px; 
+            background: #0b0b0b; 
+            padding: 12px; 
+            border: 1px solid #222; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            color: #888;
+        }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <h2>Phân Tích Khối (Bản Xuất Ảnh)</h2>
+    <h2>Phân Tích Khối 0-9 (Dark Edition)</h2>
+    <div class="legend">
+        <strong>Chế độ hiển thị tối ưu:</strong><br>
+        - <span style="background:white; color:red; padding:1px 4px">Đỏ</span>: Cụm Q ≥ 5 | 
+        - <span style="background:#002b5c; color:white; padding:1px 4px; text-decoration: line-through;">Xanh+Gạch</span>: Cụm Q < 5<br>
+        - <span style="background:#b8860b; color:black; padding:1px 4px">Vàng Đồng</span>: Đối nghịch 100% dòng kề.
+    </div>
     
-    <input type="file" id="fileInput" accept=".txt" style="width: 100%; margin-bottom: 20px;">
-
-    <div class="btn-group">
-        <button class="btn-run" onclick="processData()">XỬ LÝ DỮ LIỆU</button>
-        <button id="imgBtn" class="btn-img" onclick="exportImage()">CHỤP ẢNH KẾT QUẢ (.PNG)</button>
-        <button id="downBtn" class="btn-down" onclick="downloadTxt()">XUẤT FILE (.TXT)</button>
+    <div class="input-group">
+        <label>Dữ liệu đầu vào (.txt):</label>
+        <input type="file" id="fileInput" accept=".txt" style="width: 100%; color: #66fcf1; background: #000; padding: 10px; border: 1px solid #333;">
+        <div id="fileStatus" class="status"></div>
     </div>
 
-    <div id="fileStatus" class="status"></div>
+    <div class="btn-group">
+        <button class="btn-run" onclick="processData()">CHẠY PHÂN TÍCH</button>
+        <button id="imgBtn" class="btn-img" onclick="exportFullImage()">CHỤP TOÀN BỘ ẢNH (.PNG)</button>
+        <button id="downBtn" class="btn-down" onclick="downloadTxt()">XUẤT TXT</button>
+    </div>
 
-    <div id="output">Sẵn sàng...</div>
+    <div id="output">
+        <div id="output-capture-container">
+            Sẵn sàng...
+        </div>
+    </div>
 </div>
 
 <script>
     let finalRawText = "";
-    const KEY = 'block_analysis_v9';
+    const KEY = 'block_analysis_v9'; // Local Key mới cho bản này
 
     function isFullOpp(lA, lB) {
-        if (!lA || !lB) return false;
+        if (!lA || !lB || lA.length < 7 || lB.length < 7) return false;
         for (let p = 1; p <= 6; p++) {
             const nA = parseInt(lA[p]), nB = parseInt(lB[p]);
             if (!((nA >= 5 && nB < 5) || (nA < 5 && nB >= 5))) return false;
@@ -115,13 +171,14 @@
         } else {
             const saved = localStorage.getItem(KEY);
             if (saved) execute(saved);
-            else alert("Vui lòng chọn file!");
+            else alert("Vui lòng chọn file dữ liệu!");
         }
     }
 
     function execute(data) {
         const output = document.getElementById('output');
-        output.innerHTML = "";
+        const container = document.getElementById('output-capture-container');
+        container.innerHTML = ""; // Xóa dữ liệu cũ bên trong container
         finalRawText = "";
         let totalLines = 0;
 
@@ -148,8 +205,8 @@
                 totalLines += lines.length;
                 const header = document.createElement('div');
                 header.className = 'block-header';
-                header.textContent = `KHỐI SỐ: ${target}`;
-                output.appendChild(header);
+                header.textContent = `--- KHỐI SỐ: ${target} ---`;
+                container.appendChild(header);
 
                 finalRawText += `--- KHỐI SỐ: ${target} ---\n` + lines.join('\n') + "\n\n";
 
@@ -172,43 +229,83 @@
 
                     const div = document.createElement('div');
                     div.className = 'line';
-                    div.innerHTML = `<span class="target-digit">${cur[0]}</span><span class="${bgClass}">${qSeq}</span>${cur.substring(7)}`;
-                    output.appendChild(div);
+                    div.innerHTML = `<span class="target-digit">${cur[0]}</span><span class="${bgClass}">${qSeq}</span> ${cur.substring(7)}`;
+                    container.appendChild(div);
                 }
             }
         }
-        document.getElementById('downBtn').style.display = totalLines ? "block" : "none";
-        document.getElementById('imgBtn').style.display = totalLines ? "block" : "none";
-        document.getElementById('fileStatus').textContent = `Đã xử lý xong.`;
+        document.getElementById('downBtn').style.display = totalLines ? "inline-block" : "none";
+        document.getElementById('imgBtn').style.display = totalLines ? "inline-block" : "none";
+        document.getElementById('fileStatus').textContent = `Hoàn tất xử lý ${totalLines} dòng.`;
+        
+        if (totalLines > 0) {
+            output.scrollTop = 0; // Cuộn lên đầu
+        } else {
+            container.innerHTML = "Không tìm thấy dữ liệu khối hợp lệ.";
+        }
     }
 
-    // HÀM CHỤP ẢNH KẾT QUẢ
-    function exportImage() {
-        const target = document.getElementById('output');
+    // HÀM CHỤP TOÀN BỘ ẢNH (Đã sửa lỗi cắt ảnh)
+    function exportFullImage() {
+        // Lấy khung nội dung bên trong chứa toàn bộ dữ liệu (kể cả phần bị ẩn)
+        const container = document.getElementById('output-capture-container');
         const status = document.getElementById('fileStatus');
-        status.textContent = "Đang tạo ảnh, vui lòng chờ giây lát...";
+        const imgBtn = document.getElementById('imgBtn');
 
-        html2canvas(target, {
-            backgroundColor: "#050505", // Giữ nền đen cho ảnh
-            scale: 2, // Tăng độ nét gấp đôi
+        if (!container || container.innerHTML.trim() === "" || container.innerHTML === "Sẵn sàng...") {
+            alert("Chưa có dữ liệu để chụp ảnh.");
+            return;
+        }
+
+        status.textContent = "Đang tạo ảnh toàn bộ dữ liệu (có thể mất vài giây)...";
+        imgBtn.disabled = true; // Khóa nút để tránh nhấn nhiều lần
+
+        // Tính toán chiều cao thực tế của toàn bộ nội dung
+        const fullHeight = container.scrollHeight;
+        const fullWidth = container.scrollWidth;
+
+        html2canvas(container, {
+            backgroundColor: "#050505", // Nền đen cho ảnh
+            scale: 1.5, // Tăng độ nét nhẹ (scale 2 có thể quá lớn cho file rất dài)
             logging: false,
-            useCORS: true
+            useCORS: true,
+            allowTaint: true,
+            // Thiết lập kích thước chụp bằng kích thước thực tế của nội dung
+            height: fullHeight, 
+            width: fullWidth,
+            windowHeight: fullHeight, // Quan trọng: thiết lập chiều cao cửa sổ ảo bằng chiều cao thực
+            scrollY: -window.scrollY // Đảm bảo không bị ảnh hưởng bởi vị trí cuộn trang web
         }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Phan-Tich-Khoi-${new Date().getTime()}.png`;
-            link.href = canvas.toDataURL("image/png");
-            link.click();
-            status.textContent = "Đã tải ảnh về!";
+            try {
+                const link = document.createElement('a');
+                link.download = `Phan-Tich-Khoi-Toan-Bo-${new Date().getTime()}.png`;
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+                status.textContent = "Đã tải ảnh toàn bộ kết quả về!";
+            } catch (e) {
+                console.error("Lỗi khi tạo ảnh:", e);
+                status.textContent = "Lỗi khi tạo ảnh. Có thể dữ liệu quá lớn.";
+            }
+            imgBtn.disabled = false; // Mở khóa nút
+        }).catch(err => {
+            console.error("html2canvas error:", err);
+            status.textContent = "Lỗi kỹ thuật khi chụp ảnh.";
+            imgBtn.disabled = false;
         });
     }
 
     function downloadTxt() {
-        const blob = new Blob([finalRawText], { type: 'text/plain' });
+        if (!finalRawText) return;
+        const blob = new Blob([finalRawText], { type: 'text/plain;charset=utf-8' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = "ket_qua.txt";
+        a.download = "ket_qua_phan_tich.txt";
         a.click();
     }
+
+    window.onload = () => {
+        if (localStorage.getItem(KEY)) document.getElementById('fileStatus').textContent = "Dữ liệu cũ đã sẵn sàng trong máy.";
+    };
 </script>
 
 </body>
