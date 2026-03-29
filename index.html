@@ -2,311 +2,192 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Phân Tích Số Theo Khối - Ultra Dark Mode - Toàn bộ Ảnh</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Sequence Analyzer Pro - Sharp Edition</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            max-width: 1100px; 
-            margin: 0 auto; 
-            padding: 20px; 
-            background: linear-gradient(135deg, #000000 0%, #1a1a1d 50%, #0b0b0b 100%); 
-            background-attachment: fixed; 
-            min-height: 100vh; 
-            color: #c5c6c7; 
+        :root {
+            --bg-body: #0f0f0f;
+            --bg-container: #1a1a1a;
+            --text-main: #d1d1d1;
+            --primary: #bb86fc;
+            --secondary: #03dac6;
+            --danger: #ff5252;
+            --surface: #252525;
         }
 
-        .box { 
-            background: #111111; 
-            padding: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8); 
-            color: #c5c6c7; 
-            margin-top: 20px;
-            border: 1px solid #222;
+        body { font-family: 'Consolas', monospace; padding: 20px; background: var(--bg-body); color: var(--text-main); }
+        .container { max-width: 1100px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        
+        h2 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+
+        .controls { background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #383838; }
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; }
+
+        button { padding: 10px 15px; cursor: pointer; border: none; border-radius: 4px; font-weight: bold; background: #444; color: #ccc; }
+        button.active { background: var(--primary); color: #000; box-shadow: 0 0 10px rgba(187,134,252,0.4); }
+        .export-btn { background: var(--secondary); color: #000; }
+        .clear-btn { background: #555; color: white; }
+
+        #result { 
+            height: 500px; overflow-y: auto; border: 1px solid #333; padding: 20px; 
+            word-break: break-all; font-size: 1.4rem; line-height: 1.2; /* Line-height thấp để gạch chân sát số */
+            background: #050505; border-radius: 8px;
         }
 
-        h2 { color: #66fcf1; text-align: center; text-transform: uppercase; letter-spacing: 2px; }
-
-        .input-group { margin-bottom: 20px; border-bottom: 1px solid #222; padding-bottom: 15px; }
-        
-        input[type="file"] { 
-            width: 100%; padding: 12px; 
-            border: 1px dashed #333; 
-            border-radius: 6px; 
-            background: #0b0b0b; 
-            color: #66fcf1;
-            cursor: pointer;
-        }
-
-        .btn-group { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; min-width: 150px;}
-        
-        .btn-run { background: #1f2833; color: #66fcf1; border: 1px solid #66fcf1; }
-        .btn-run:hover { background: #66fcf1; color: #0b0b0b; }
-        
-        /* Nút Chụp Ảnh */
-        .btn-img { background: #ffc107; color: #000; display: none; }
-        .btn-img:hover { background: #e0a800; }
-
-        .btn-down { background: #28a745; color: white; display: none; }
-        .btn-down:hover { background: #218838; }
-        
-        /* Bảng hiển thị kết quả */
-        #output { 
-            margin-top: 20px; 
-            background: #050505; 
-            padding: 20px; 
-            border-radius: 8px; 
-            /* CÀI ĐẶT THANH CUỘN */
-            max-height: 800px; 
-            overflow-y: auto; 
-            border: 1px solid #333;
-            line-height: 1.2; 
-            font-family: 'Courier New', monospace;
-            font-size: 20px; 
-            letter-spacing: 2px;
-            color: #00ff41; 
-        }
-
-        /* Thêm một khung bao bên ngoài để trợ giúp chụp ảnh */
-        #output-capture-container {
-            width: 100%;
-        }
-
-        .block-header { 
-            background: #1a1a1a; 
-            color: #45a29e; 
-            padding: 12px; 
-            margin: 35px 0 12px 0; 
-            border-radius: 4px; 
-            font-size: 22px; 
-            font-weight: bold;
-            border-left: 4px solid #45a29e;
-        }
-
-        .line { white-space: nowrap; margin-bottom: 4px; border-bottom: 1px solid #111; display: flex; align-items: center;}
-        
-        .target-digit { color: #0b0b0b; font-weight: bold; background: #c5c6c7; padding: 0 6px; border-radius: 2px; margin-right: 5px; display: inline-block; min-width: 1ch; text-align: center;}
-        
-        .q-bg-red { background-color: white !important; color: red !important; } 
-        
-        .q-bg-blue { 
-            background-color: #002b5c !important; 
-            color: #ffffff !important; 
-            /* Gạch ngang 0.2px */
-            text-decoration: line-through;
-            text-decoration-color: #ffffff;
-            text-decoration-thickness: 0.2px;
+        /* ĐỊNH DẠNG SỐ VÀ GẠCH CHÂN SÁT */
+        .num-item { 
+            display: inline-block; 
+            width: 20px; 
+            text-align: center; 
+            margin: 8px 2px; /* Khoảng cách giữa các dòng và các số */
+            color: #666; 
         }
         
-        .q-bg-yellow { background-color: #b8860b !important; color: #000000 !important; font-weight: bold; }
-        
-        .status { color: #66fcf1; font-weight: bold; margin-top: 10px; font-size: 0.9em; }
-
-        .legend { 
-            font-size: 13px; 
-            background: #0b0b0b; 
-            padding: 12px; 
-            border: 1px solid #222; 
-            border-radius: 6px; 
-            margin-bottom: 15px; 
-            color: #888;
+        .is-a { 
+            color: var(--danger); 
+            font-weight: bold; 
+            border-bottom: 3px solid var(--danger); /* Gạch chân sát số */
+            line-height: 1; 
+            display: inline-block;
         }
+
+        .highlight { 
+            background-color: #ffd700 !important; 
+            color: #000 !important; 
+            border-radius: 2px; 
+            box-shadow: 0 0 5px #ffd700;
+        }
+
+        .stats { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-box { flex: 1; background: var(--surface); padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #333; }
+        .stat-box b { color: var(--secondary); font-size: 1.2rem; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>Phân Tích Khối 0-9 (Dark Edition)</h2>
-    <div class="legend">
-        <strong>Chế độ hiển thị tối ưu:</strong><br>
-        - <span style="background:white; color:red; padding:1px 4px">Đỏ</span>: Cụm Q ≥ 5 | 
-        - <span style="background:#002b5c; color:white; padding:1px 4px; text-decoration: line-through;">Xanh+Gạch</span>: Cụm Q < 5<br>
-        - <span style="background:#b8860b; color:black; padding:1px 4px">Vàng Đồng</span>: Đối nghịch 100% dòng kề.
-    </div>
-    
-    <div class="input-group">
-        <label>Dữ liệu đầu vào (.txt):</label>
-        <input type="file" id="fileInput" accept=".txt" style="width: 100%; color: #66fcf1; background: #000; padding: 10px; border: 1px solid #333;">
-        <div id="fileStatus" class="status"></div>
-    </div>
+<div class="container">
+    <h2>Sequence Analyzer <span style="color: #666;">v3.0</span></h2>
 
-    <div class="btn-group">
-        <button class="btn-run" onclick="processData()">CHẠY PHÂN TÍCH</button>
-        <button id="imgBtn" class="btn-img" onclick="exportFullImage()">CHỤP TOÀN BỘ ẢNH (.PNG)</button>
-        <button id="downBtn" class="btn-down" onclick="downloadTxt()">XUẤT TXT</button>
-    </div>
-
-    <div id="output">
-        <div id="output-capture-container">
-            Sẵn sàng...
+    <div class="controls">
+        <strong>📂 Chọn File:</strong> <input type="file" id="fileInput" accept=".txt" style="color:#888">
+        <div class="btn-group">
+            <button id="mode1Btn" onclick="setMode(1)">TH 1: n+1>n & n+2<5</button>
+            <button id="mode2Btn" onclick="setMode(2)">TH 2: n+1<n & n+2>5</button>
+            <button class="export-btn" onclick="exportResults()">💾 Xuất File</button>
+            <button class="clear-btn" onclick="clearData()">Reset</button>
         </div>
     </div>
+
+    <div class="stats">
+        <div class="stat-box">Tổng số: <b id="totalCount">0</b></div>
+        <div class="stat-box">Số loại (a): <b id="aCount">0</b></div>
+        <div class="stat-box">Cụm đạt chuẩn: <b id="groupCount">0</b></div>
+    </div>
+
+    <div id="result"></div>
 </div>
 
 <script>
-    let finalRawText = "";
-    const KEY = 'block_analysis_v9'; // Local Key mới cho bản này
+    let currentMode = 1;
+    let rawData = localStorage.getItem('lastData') || "";
 
-    function isFullOpp(lA, lB) {
-        if (!lA || !lB || lA.length < 7 || lB.length < 7) return false;
-        for (let p = 1; p <= 6; p++) {
-            const nA = parseInt(lA[p]), nB = parseInt(lB[p]);
-            if (!((nA >= 5 && nB < 5) || (nA < 5 && nB >= 5))) return false;
-        }
-        return true;
+    window.onload = () => {
+        const savedMode = localStorage.getItem('lastMode');
+        if(savedMode) currentMode = parseInt(savedMode);
+        updateButtons();
+        if(rawData) processData(rawData, false); // false để không hiện alert khi vừa mở trang
+    };
+
+    function setMode(mode) {
+        currentMode = mode;
+        localStorage.setItem('lastMode', mode);
+        updateButtons();
+        if(rawData) processData(rawData, true);
     }
 
-    function processData() {
-        const fileInput = document.getElementById('fileInput');
-        if (fileInput.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result.replace(/[^0-9]/g, '');
-                localStorage.setItem(KEY, content);
-                execute(content);
-            };
-            reader.readAsText(fileInput.files[0]);
-        } else {
-            const saved = localStorage.getItem(KEY);
-            if (saved) execute(saved);
-            else alert("Vui lòng chọn file dữ liệu!");
-        }
+    function updateButtons() {
+        document.getElementById('mode1Btn').className = currentMode === 1 ? 'active' : '';
+        document.getElementById('mode2Btn').className = currentMode === 2 ? 'active' : '';
     }
 
-    function execute(data) {
-        const output = document.getElementById('output');
-        const container = document.getElementById('output-capture-container');
-        container.innerHTML = ""; // Xóa dữ liệu cũ bên trong container
-        finalRawText = "";
-        let totalLines = 0;
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            rawData = e.target.result;
+            localStorage.setItem('lastData', rawData);
+            processData(rawData, true);
+        };
+        reader.readAsText(file);
+    });
 
-        for (let digit = 0; digit <= 9; digit++) {
-            let target = digit.toString();
-            let lines = [];
-            let i = 0;
+    function processData(content, showAlert) {
+        const nums = content.replace(/\D/g, '').split('').map(Number);
+        if (nums.length < 3) return;
 
-            while (i < data.length) {
-                let start = data.indexOf(target, i);
-                if (start === -1) break;
-                let nextPos = data.indexOf(target, start + 7);
-                if (nextPos !== -1) {
-                    lines.push(data.substring(start, nextPos));
-                    i = nextPos;
+        const isA = new Array(nums.length).fill(false);
+        let aTotal = 0;
+
+        for (let i = 0; i <= nums.length - 3; i++) {
+            let match = (currentMode === 1) 
+                ? (nums[i+1] > nums[i] && nums[i+2] < 5)
+                : (nums[i+1] < nums[i] && nums[i+2] > 5);
+            if (match) { isA[i+2] = true; aTotal++; }
+        }
+
+        let highlightIndices = new Set();
+        let groupCount = 0;
+        let temp = [];
+        for (let i = 0; i < isA.length; i++) {
+            if (isA[i]) temp.push(i);
+            else {
+                if (temp.length >= 6) { temp.forEach(idx => highlightIndices.add(idx)); groupCount++; }
+                temp = [];
+            }
+        }
+        if (temp.length >= 6) { temp.forEach(idx => highlightIndices.add(idx)); groupCount++; }
+
+        // Update UI
+        document.getElementById('totalCount').innerText = nums.length;
+        document.getElementById('aCount').innerText = aTotal;
+        document.getElementById('groupCount').innerText = groupCount;
+
+        let html = '';
+        for (let i = 0; i < nums.length; i++) {
+            let cls = ['num-item'];
+            if (isA[i]) cls.push('is-a');
+            if (highlightIndices.has(i)) cls.push('highlight');
+            html += `<span class="${cls.join(' ')}">${nums[i]}</span>`;
+        }
+        document.getElementById('result').innerHTML = html;
+
+        // THÔNG BÁO
+        if (showAlert) {
+            setTimeout(() => {
+                if (groupCount > 0) {
+                    alert(`✅ Hoàn thành! Đã tìm thấy ${groupCount} cụm số hợp lệ (tô vàng).`);
                 } else {
-                    let last = data.substring(start);
-                    if (last.length >= 7) lines.push(last);
-                    break;
+                    alert(`❌ Không tìm thấy dãy 6 số "a" liên tiếp nào trong dữ liệu này.`);
                 }
-            }
-
-            if (lines.length > 0) {
-                totalLines += lines.length;
-                const header = document.createElement('div');
-                header.className = 'block-header';
-                header.textContent = `--- KHỐI SỐ: ${target} ---`;
-                container.appendChild(header);
-
-                finalRawText += `--- KHỐI SỐ: ${target} ---\n` + lines.join('\n') + "\n\n";
-
-                for (let n = 0; n < lines.length; n++) {
-                    const cur = lines[n];
-                    const qSeq = cur.substring(1, 7);
-                    let bgClass = "";
-
-                    if (isFullOpp(cur, lines[n+1]) || isFullOpp(cur, lines[n-1])) {
-                        bgClass = "q-bg-yellow";
-                    } else {
-                        let allHigh = true, allLow = true;
-                        for(let char of qSeq) {
-                            if(parseInt(char) < 5) allHigh = false;
-                            if(parseInt(char) >= 5) allLow = false;
-                        }
-                        if (allHigh) bgClass = "q-bg-red";
-                        else if (allLow) bgClass = "q-bg-blue";
-                    }
-
-                    const div = document.createElement('div');
-                    div.className = 'line';
-                    div.innerHTML = `<span class="target-digit">${cur[0]}</span><span class="${bgClass}">${qSeq}</span> ${cur.substring(7)}`;
-                    container.appendChild(div);
-                }
-            }
-        }
-        document.getElementById('downBtn').style.display = totalLines ? "inline-block" : "none";
-        document.getElementById('imgBtn').style.display = totalLines ? "inline-block" : "none";
-        document.getElementById('fileStatus').textContent = `Hoàn tất xử lý ${totalLines} dòng.`;
-        
-        if (totalLines > 0) {
-            output.scrollTop = 0; // Cuộn lên đầu
-        } else {
-            container.innerHTML = "Không tìm thấy dữ liệu khối hợp lệ.";
+            }, 100);
         }
     }
 
-    // HÀM CHỤP TOÀN BỘ ẢNH (Đã sửa lỗi cắt ảnh)
-    function exportFullImage() {
-        // Lấy khung nội dung bên trong chứa toàn bộ dữ liệu (kể cả phần bị ẩn)
-        const container = document.getElementById('output-capture-container');
-        const status = document.getElementById('fileStatus');
-        const imgBtn = document.getElementById('imgBtn');
-
-        if (!container || container.innerHTML.trim() === "" || container.innerHTML === "Sẵn sàng...") {
-            alert("Chưa có dữ liệu để chụp ảnh.");
-            return;
-        }
-
-        status.textContent = "Đang tạo ảnh toàn bộ dữ liệu (có thể mất vài giây)...";
-        imgBtn.disabled = true; // Khóa nút để tránh nhấn nhiều lần
-
-        // Tính toán chiều cao thực tế của toàn bộ nội dung
-        const fullHeight = container.scrollHeight;
-        const fullWidth = container.scrollWidth;
-
-        html2canvas(container, {
-            backgroundColor: "#050505", // Nền đen cho ảnh
-            scale: 1.5, // Tăng độ nét nhẹ (scale 2 có thể quá lớn cho file rất dài)
-            logging: false,
-            useCORS: true,
-            allowTaint: true,
-            // Thiết lập kích thước chụp bằng kích thước thực tế của nội dung
-            height: fullHeight, 
-            width: fullWidth,
-            windowHeight: fullHeight, // Quan trọng: thiết lập chiều cao cửa sổ ảo bằng chiều cao thực
-            scrollY: -window.scrollY // Đảm bảo không bị ảnh hưởng bởi vị trí cuộn trang web
-        }).then(canvas => {
-            try {
-                const link = document.createElement('a');
-                link.download = `Phan-Tich-Khoi-Toan-Bo-${new Date().getTime()}.png`;
-                link.href = canvas.toDataURL("image/png");
-                link.click();
-                status.textContent = "Đã tải ảnh toàn bộ kết quả về!";
-            } catch (e) {
-                console.error("Lỗi khi tạo ảnh:", e);
-                status.textContent = "Lỗi khi tạo ảnh. Có thể dữ liệu quá lớn.";
-            }
-            imgBtn.disabled = false; // Mở khóa nút
-        }).catch(err => {
-            console.error("html2canvas error:", err);
-            status.textContent = "Lỗi kỹ thuật khi chụp ảnh.";
-            imgBtn.disabled = false;
-        });
-    }
-
-    function downloadTxt() {
-        if (!finalRawText) return;
-        const blob = new Blob([finalRawText], { type: 'text/plain;charset=utf-8' });
+    function exportResults() {
+        if (!rawData) return alert("Không có dữ liệu!");
+        const blob = new Blob([document.getElementById('result').innerText], {type: 'text/plain'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = "ket_qua_phan_tich.txt";
+        a.download = `ket_qua_th${currentMode}.txt`;
         a.click();
     }
 
-    window.onload = () => {
-        if (localStorage.getItem(KEY)) document.getElementById('fileStatus').textContent = "Dữ liệu cũ đã sẵn sàng trong máy.";
-    };
+    function clearData() {
+        if(confirm("Xóa sạch dữ liệu?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
 </script>
-
 </body>
 </html>
