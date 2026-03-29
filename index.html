@@ -2,149 +2,160 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Sequence Analyzer Pro - Fixed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequence Analyzer Pro - Full Fixed</title>
     <style>
         :root {
-            --bg-body: #0f0f0f;
-            --bg-container: #1a1a1a;
-            --text-main: #d1d1d1;
+            --bg-body: #0a0a0a;
+            --bg-container: #161616;
+            --text-main: #e0e0e0;
             --primary: #bb86fc;
             --secondary: #03dac6;
             --danger: #ff5252;
-            --surface: #252525;
+            --surface: #222222;
         }
 
-        body { font-family: 'Consolas', monospace; padding: 20px; background: var(--bg-body); color: var(--text-main); }
-        .container { max-width: 1100px; margin: auto; background: var(--bg-container); padding: 25px; border-radius: 12px; border: 1px solid #333; }
+        body { font-family: 'Consolas', 'Monaco', monospace; padding: 15px; background: var(--bg-body); color: var(--text-main); margin: 0; }
+        .container { max-width: 1000px; margin: auto; background: var(--bg-container); padding: 20px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         
-        h2 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; }
+        h2 { text-align: center; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; margin-top: 0; }
 
-        .controls { background: var(--surface); padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #383838; }
+        /* THANH ĐIỀU KHIỂN CHẾ ĐỘ HIỂN THỊ */
+        .view-toggle { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #333; }
+        .view-toggle button { background: #333; color: #888; padding: 8px 15px; font-size: 0.8rem; }
+        .view-toggle button.active-view { background: #444; color: white; border: 1px solid var(--primary); }
+
+        .controls { background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #333; }
         
-        /* FIX LỖI NÚT Ở ĐÂY */
-        .btn-group { 
-            display: flex; 
-            gap: 12px; 
-            margin-top: 15px; 
-            flex-wrap: wrap; /* Cho phép xuống dòng nếu màn hình nhỏ */
-            align-items: center;
-        }
+        /* CẤU TRÚC NÚT BẤM */
+        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
+        
+        /* Chế độ Desktop (Mặc định) */
+        .desktop-v .btn-group { flex-direction: row; }
+        .desktop-v .btn-group button { flex: 1; min-width: fit-content; }
+
+        /* Chế độ Mobile */
+        .mobile-v .btn-group { flex-direction: column; }
+        .mobile-v .btn-group button { width: 100%; padding: 15px; font-size: 1rem; }
 
         button { 
-            padding: 12px 20px; 
-            cursor: pointer; 
-            border: none; 
-            border-radius: 6px; 
-            font-weight: bold; 
-            background: #444; 
-            color: #ccc;
-            white-space: nowrap; /* Giữ chữ trên 1 hàng, không cho xuống dòng */
-            min-width: fit-content; /* Nút tự rộng ra theo chữ */
-            font-size: 0.95rem;
-            transition: all 0.2s ease;
+            padding: 10px 15px; cursor: pointer; border: none; border-radius: 6px; 
+            font-weight: bold; background: #3d3d3d; color: #bbb; white-space: nowrap; transition: 0.2s;
         }
-
-        button.active { 
-            background: var(--primary); 
-            color: #000; 
-            box-shadow: 0 0 15px rgba(187,134,252,0.5); 
-        }
-
+        button.active { background: var(--primary); color: #000; box-shadow: 0 0 12px rgba(187,134,252,0.4); }
         .export-btn { background: var(--secondary); color: #000; }
         .clear-btn { background: #555; color: white; }
-        button:hover { opacity: 0.9; transform: scale(1.02); }
 
+        /* VÙNG KẾT QUẢ */
         #result { 
-            height: 500px; overflow-y: auto; border: 1px solid #333; padding: 20px; 
-            word-break: break-all; font-size: 1.4rem; line-height: 1.1; 
-            background: #050505; border-radius: 8px;
+            height: 450px; overflow-y: auto; border: 1px solid #222; padding: 15px; 
+            word-break: break-all; font-size: 1.3rem; line-height: 1; background: #050505; border-radius: 6px;
         }
 
-        .num-item { display: inline-block; width: 22px; text-align: center; margin: 10px 2px; color: #666; }
+        .num-item { display: inline-block; width: 22px; text-align: center; margin: 10px 2px; color: #555; }
         
-        /* Gạch chân sát số */
+        /* Gạch chân sát số a */
         .is-a { 
             color: var(--danger); 
             font-weight: bold; 
             border-bottom: 3px solid var(--danger); 
-            padding-bottom: 0px;
             display: inline-block;
-            line-height: 0.9;
+            line-height: 0.85; /* Sát chân số */
         }
 
         .highlight { 
             background-color: #ffd700 !important; 
             color: #000 !important; 
-            border-radius: 3px; 
-            box-shadow: 0 0 8px #ffd700;
+            border-radius: 2px; 
+            box-shadow: 0 0 5px #ffd700;
         }
 
-        .stats { display: flex; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .stat-box { flex: 1; min-width: 150px; background: var(--surface); padding: 15px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .stat-box b { color: var(--secondary); font-size: 1.3rem; display: block; margin-top: 5px; }
+        .stats { display: flex; gap: 10px; margin-bottom: 15px; }
+        .stat-box { flex: 1; background: var(--surface); padding: 10px; border-radius: 6px; text-align: center; border: 1px solid #333; }
+        .stat-box b { color: var(--secondary); font-size: 1.1rem; display: block; }
     </style>
 </head>
-<body>
+<body id="mainBody" class="desktop-v">
 
 <div class="container">
-    <h2>Sequence Analyzer Pro</h2>
+    <div class="view-toggle">
+        <button id="btnVDesktop" onclick="changeView('desktop-v')">💻 MÁY TÍNH</button>
+        <button id="btnVMobile" onclick="changeView('mobile-v')">📱 ĐIỆN THOẠI</button>
+    </div>
+
+    <h2>Sequence Analyzer <span style="font-size: 0.6em; color: #555;">v4.0</span></h2>
 
     <div class="controls">
         <strong>📂 Chọn File:</strong> 
-        <input type="file" id="fileInput" accept=".txt" style="color:#888; margin-left: 10px;">
+        <input type="file" id="fileInput" accept=".txt" style="color: #888; margin-top: 5px; width: 100%;">
         
         <div class="btn-group">
             <button id="mode1Btn" onclick="setMode(1)">TH 1: n+1 > n & n+2 < 5</button>
             <button id="mode2Btn" onclick="setMode(2)">TH 2: n+1 < n & n+2 > 5</button>
             <button class="export-btn" onclick="exportResults()">💾 Xuất File</button>
-            <button class="clear-btn" onclick="clearData()">Reset</button>
+            <button class="clear-btn" onclick="clearData()">Xóa hết</button>
         </div>
     </div>
 
     <div class="stats">
-        <div class="stat-box">Tổng số chữ số<b id="totalCount">0</b></div>
-        <div class="stat-box">Số loại (a)<b id="aCount">0</b></div>
-        <div class="stat-box">Cụm đạt chuẩn (≥6)<b id="groupCount">0</b></div>
+        <div class="stat-box">Tổng: <b id="totalCount">0</b></div>
+        <div class="stat-box">Loại (a): <b id="aCount">0</b></div>
+        <div class="stat-box">Cụm ≥ 6: <b id="groupCount">0</b></div>
     </div>
 
-    <div id="result"></div>
+    <div id="result">Hãy tải file .txt để bắt đầu...</div>
 </div>
 
 <script>
     let currentMode = 1;
-    let rawData = localStorage.getItem('lastData_v2') || "";
+    let rawData = localStorage.getItem('storedData') || "";
 
+    // 1. Quản lý Chế độ hiển thị (Mobile/Desktop)
+    function changeView(viewMode) {
+        document.getElementById('mainBody').className = viewMode;
+        document.getElementById('btnVDesktop').classList.toggle('active-view', viewMode === 'desktop-v');
+        document.getElementById('btnVMobile').classList.toggle('active-view', viewMode === 'mobile-v');
+        localStorage.setItem('viewPreference', viewMode);
+    }
+
+    // 2. Khởi tạo khi trang load
     window.onload = () => {
-        const savedMode = localStorage.getItem('lastMode_v2');
+        const savedView = localStorage.getItem('viewPreference') || 'desktop-v';
+        const savedMode = localStorage.getItem('storedMode');
+        
+        changeView(savedView);
         if(savedMode) currentMode = parseInt(savedMode);
-        updateButtons();
+        
+        updateModeButtons();
         if(rawData) processData(rawData, false);
     };
 
     function setMode(mode) {
         currentMode = mode;
-        localStorage.setItem('lastMode_v2', mode);
-        updateButtons();
+        localStorage.setItem('storedMode', mode);
+        updateModeButtons();
         if(rawData) processData(rawData, true);
     }
 
-    function updateButtons() {
-        document.getElementById('mode1Btn').className = currentMode === 1 ? 'active' : '';
-        document.getElementById('mode2Btn').className = currentMode === 2 ? 'active' : '';
+    function updateModeButtons() {
+        document.getElementById('mode1Btn').className = (currentMode === 1 ? 'active' : '');
+        document.getElementById('mode2Btn').className = (currentMode === 2 ? 'active' : '');
     }
 
+    // 3. Xử lý File
     document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
         reader.onload = (e) => {
             rawData = e.target.result;
-            localStorage.setItem('lastData_v2', rawData);
+            localStorage.setItem('storedData', rawData);
             processData(rawData, true);
         };
         reader.readAsText(file);
     });
 
+    // 4. Logic chính
     function processData(content, showAlert) {
         const nums = content.replace(/\D/g, '').split('').map(Number);
         if (nums.length < 3) return;
@@ -161,49 +172,58 @@
 
         let highlightIndices = new Set();
         let groupCount = 0;
-        let temp = [];
+        let tempGroup = [];
+
         for (let i = 0; i < isA.length; i++) {
-            if (isA[i]) temp.push(i);
-            else {
-                if (temp.length >= 6) { temp.forEach(idx => highlightIndices.add(idx)); groupCount++; }
-                temp = [];
+            if (isA[i]) {
+                tempGroup.push(i);
+            } else {
+                if (tempGroup.length >= 6) {
+                    tempGroup.forEach(idx => highlightIndices.add(idx));
+                    groupCount++;
+                }
+                tempGroup = [];
             }
         }
-        if (temp.length >= 6) { temp.forEach(idx => highlightIndices.add(idx)); groupCount++; }
+        if (tempGroup.length >= 6) {
+            tempGroup.forEach(idx => highlightIndices.add(idx));
+            groupCount++;
+        }
 
+        // Cập nhật giao diện
         document.getElementById('totalCount').innerText = nums.length.toLocaleString();
         document.getElementById('aCount').innerText = aTotal.toLocaleString();
         document.getElementById('groupCount').innerText = groupCount.toLocaleString();
 
         let html = '';
         for (let i = 0; i < nums.length; i++) {
-            let cls = ['num-item'];
-            if (isA[i]) cls.push('is-a');
-            if (highlightIndices.has(i)) cls.push('highlight');
-            html += `<span class="${cls.join(' ')}">${nums[i]}</span>`;
+            let classes = ['num-item'];
+            if (isA[i]) classes.push('is-a');
+            if (highlightIndices.has(i)) classes.push('highlight');
+            html += `<span class="${classes.join(' ')}">${nums[i]}</span>`;
         }
         document.getElementById('result').innerHTML = html;
 
         if (showAlert) {
             setTimeout(() => {
-                if (groupCount > 0) alert(`✅ Tìm thấy ${groupCount} cụm số hợp lệ!`);
+                if (groupCount > 0) alert(`✅ Đã tìm thấy ${groupCount} cụm số hợp lệ!`);
                 else alert(`❌ Không tìm thấy cụm 6 số liên tiếp thỏa mãn.`);
             }, 100);
         }
     }
 
     function exportResults() {
-        if (!rawData) return alert("Không có dữ liệu!");
-        const content = document.getElementById('result').innerText;
-        const blob = new Blob([content], {type: 'text/plain'});
+        if (!rawData) return alert("Chưa có dữ liệu!");
+        const txt = document.getElementById('result').innerText;
+        const blob = new Blob([txt], {type: 'text/plain'});
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
-        a.download = `ket_qua_thong_ke.txt`;
+        a.download = `ket_qua_th${currentMode}.txt`;
         a.click();
     }
 
     function clearData() {
-        if(confirm("Xóa sạch dữ liệu đã lưu?")) {
+        if(confirm("Xóa toàn bộ dữ liệu lưu trữ?")) {
             localStorage.clear();
             location.reload();
         }
