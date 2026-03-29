@@ -215,42 +215,48 @@
     }
 
             async function exportResults() {
-        const resultArea = document.getElementById('result');
-        if (!rawData || resultArea.innerText.includes("Hãy tải file")) {
-            return alert("❌ Chưa có dữ liệu để xuất ảnh!");
-        }
-
-        const btnExport = document.querySelector('.export-btn');
-        const shortID = Date.now().toString().slice(-4);
-        const fileName = `168-${shortID}.png`;
-
-        // Thông báo trạng thái đang xử lý
-        btnExport.innerText = "⏳ Đang tạo ảnh...";
-        btnExport.style.opacity = "0.5";
-
-        try {
-            const canvas = await html2canvas(resultArea, {
-                backgroundColor: "#000000", // Ép nền đen nguyên xi
-                scale: 2,                  // Tăng độ nét cho ảnh
-                logging: false,
-                useCORS: true,
-                // Đảm bảo chụp hết nội dung bên trong vùng cuộn
-                height: resultArea.scrollHeight,
-                windowHeight: resultArea.scrollHeight
-            });
-
-            const link = document.createElement('a');
-            link.href = canvas.toDataURL("image/png");
-            link.download = fileName;
-            link.click();
-        } catch (err) {
-            console.error("Lỗi xuất ảnh:", err);
-            alert("Có lỗi khi tạo ảnh, vui lòng thử lại.");
-        } finally {
-            btnExport.innerText = "💾 Xuất Ảnh";
-            btnExport.style.opacity = "1";
-        }
+    const resultArea = document.getElementById('result');
+    
+    // Kiểm tra nếu chưa có dữ liệu
+    if (!rawData || resultArea.innerText.includes("Hãy tải file")) {
+        return alert("❌ Chưa có dữ liệu để xuất ảnh!");
     }
+
+    // 1. Tạo tên file: 168 + 4 số cuối của timestamp (ví dụ: 168-4521.png)
+    const shortID = Date.now().toString().slice(-4);
+    const fileName = `168-${shortID}.png`;
+
+    // 2. Cấu hình chụp toàn bộ nội dung trong vùng cuộn
+    const captureOptions = {
+        backgroundColor: "#000000", // Nền đen nguyên xi
+        scale: 2,                  // Tăng độ nét gấp đôi
+        logging: false,
+        useCORS: true,
+        // Ép html2canvas chụp hết chiều cao thực tế (scrollHeight) thay vì chỉ vùng đang hiện hữu
+        height: resultArea.scrollHeight,
+        windowHeight: resultArea.scrollHeight,
+        onclone: (clonedDoc) => {
+            // Đảm bảo phần tử được chụp trong bản sao không bị giới hạn chiều cao
+            const clonedResult = clonedDoc.getElementById('result');
+            clonedResult.style.height = 'auto';
+            clonedResult.style.overflow = 'visible';
+        }
+    };
+
+    try {
+        const canvas = await html2canvas(resultArea, captureOptions);
+        
+        // Tạo link tải ảnh
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL("image/png");
+        link.download = fileName;
+        link.click();
+    } catch (err) {
+        console.error("Lỗi xuất ảnh:", err);
+        alert("Có lỗi khi tạo ảnh, vui lòng thử lại.");
+    }
+}
+
 
     function clearData() {
         if(confirm("Xóa toàn bộ dữ liệu lưu trữ?")) {
