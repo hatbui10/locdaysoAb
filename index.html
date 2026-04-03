@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sequence Analyzer v13.0 - Stable Storage</title>
+    <title>Sequence Analyzer v14.0 - Extraction Edition</title>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         :root {
@@ -14,6 +14,7 @@
             --secondary: #03dac6;
             --accent: #6200ee;
             --surface: #222222;
+            --success: #4caf50;
         }
 
         body { font-family: 'Consolas', 'Monaco', monospace; padding: 15px; background: var(--bg-body); color: var(--text-main); margin: 0; }
@@ -31,22 +32,40 @@
             background: #000; border: 1px solid #555; color: var(--secondary); 
             padding: 8px; border-radius: 4px; width: 80px; text-align: center; font-size: 1rem;
         }
-        .search-btn { background: var(--accent) !important; color: white !important; }
-
+        
         .btn-group { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 15px; }
 
         button { 
             padding: 10px 15px; cursor: pointer; border: none; border-radius: 6px; 
             font-weight: bold; background: #3d3d3d; color: #bbb; transition: 0.2s;
         }
+        button:hover { opacity: 0.8; }
+        
+        .search-btn { background: var(--accent) !important; color: white !important; }
+        .extract-btn { background: #ff9800 !important; color: white !important; }
         .export-btn { background: var(--secondary); color: #000; }
         .clear-btn { background: #555; color: white; }
+
+        /* Phân vùng hiển thị chính */
+        .main-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        @media (max-width: 800px) { .main-layout { grid-template-columns: 1fr; } }
 
         #result { 
             height: 500px; overflow-y: auto; border: 1px solid #222; 
             padding: 15px; word-break: break-all; font-size: 1.2rem; 
             line-height: 1.8; background: #050505; border-radius: 6px;
         }
+
+        /* Phân vùng trích xuất mới */
+        .extraction-area {
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        #extractedText {
+            width: 100%; height: 425px; background: #000; color: var(--secondary);
+            border: 1px solid #444; border-radius: 6px; padding: 10px;
+            font-family: 'Consolas', monospace; font-size: 1.1rem; resize: none;
+        }
+        .copy-btn { background: var(--success); color: white; width: 100%; }
 
         .num-item { display: inline-block; width: 28px; text-align: center; color: #666; }
         .highlight { background-color: #ffd700 !important; color: #000 !important; font-weight: bold; }
@@ -60,20 +79,21 @@
 <body>
 
 <div class="container">
-    <h2>Pattern Analyzer <span style="font-size: 0.5em; color: #777;">v13.0 (Stable)</span></h2>
+    <h2>Pattern Analyzer <span style="font-size: 0.5em; color: #777;">v14.0 (Extract)</span></h2>
 
     <div class="controls">
         <div class="search-box">
-            <strong>🔍 Tìm 2 số cụ thể:</strong>
+            <strong>🔍 Cặp số (2 chữ số):</strong>
             <input type="text" id="searchInput" placeholder="VD: 23" maxlength="2">
-            <button class="search-btn" onclick="startSearch()">Tìm kiếm</button>
+            <button class="search-btn" onclick="startSearch()">Chỉ Tìm</button>
+            <button class="extract-btn" onclick="extractSequences()">✂️ Cắt & Trích xuất</button>
         </div>
 
         <strong>📂 Tải file (.txt):</strong> 
         <input type="file" id="fileInput" accept=".txt" multiple style="display: block; margin-top: 10px; color: #888;">
         
         <div class="btn-group">
-            <button class="export-btn" onclick="exportResults()">💾 Xuất Ảnh</button>
+            <button class="export-btn" onclick="exportResults()">💾 Xuất Ảnh Bảng Số</button>
             <button class="clear-btn" onclick="clearData()">Xóa vĩnh viễn dữ liệu</button>
         </div>
     </div>
@@ -81,27 +101,30 @@
     <div class="stats">
         <div class="stat-box">Tổng chữ số: <b id="totalCount">0</b></div>
         <div class="stat-box">Mẫu 9 số (Vàng): <b id="groupCount">0</b></div>
-        <div class="stat-box">Kết quả tìm (Tím): <b id="searchCount">0</b></div>
+        <div class="stat-box">Tìm thấy: <b id="searchCount">0</b></div>
     </div>
 
-    <div id="result">Đang kiểm tra dữ liệu cũ...</div>
+    <div class="main-layout">
+        <div id="result">Đang kiểm tra dữ liệu...</div>
+        
+        <div class="extraction-area">
+            <strong style="color: var(--secondary);">📋 Kết quả trích xuất (8 số):</strong>
+            <textarea id="extractedText" readonly placeholder="Kết quả cắt sẽ hiện ở đây..."></textarea>
+            <button class="copy-btn" onclick="copyExtracted()">Sao chép dãy đã cắt</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    // CỐ ĐỊNH TÊN BIẾN ĐỂ KHÔNG MẤT DỮ LIỆU KHI UPDATE
     const STORAGE_KEY = 'sequence_analyzer_data';
     let rawData = "";
     let searchTarget = "";
 
     window.onload = () => {
-        // Cố gắng khôi phục dữ liệu từ tất cả các phiên bản trước đó (nếu có)
         rawData = localStorage.getItem(STORAGE_KEY) || 
-                  localStorage.getItem('storedMultiData') || 
-                  localStorage.getItem('storedDataV11') || 
-                  localStorage.getItem('storedDataV10') || "";
+                  localStorage.getItem('storedMultiData') || "";
         
         if(rawData) {
-            localStorage.setItem(STORAGE_KEY, rawData); // Đồng nhất về một biến
             processData(rawData);
         } else {
             document.getElementById('result').innerText = "Vui lòng chọn file để bắt đầu.";
@@ -112,7 +135,7 @@
         const files = e.target.files;
         if (!files.length) return;
 
-        let combinedContent = rawData; // Giữ lại dữ liệu hiện tại và cộng thêm file mới
+        let combinedContent = rawData; 
         for (let file of files) {
             const text = await file.text();
             combinedContent += " " + text;
@@ -128,6 +151,38 @@
         if (rawData) processData(rawData);
     }
 
+    // HÀM CHÍNH ĐỂ CẮT DÃY SỐ THEO YÊU CẦU - ĐÃ SỬA THEO MẪU: 61 - 25 15 35
+    function extractSequences() {
+        searchTarget = document.getElementById('searchInput').value.trim();
+        if (searchTarget.length !== 2) {
+            alert("Vui lòng nhập đúng 2 số cần tìm!");
+            return;
+        }
+
+        const nums = rawData.replace(/\D/g, '').split('').map(Number);
+        const s1 = parseInt(searchTarget[0]);
+        const s2 = parseInt(searchTarget[1]);
+        let results = [];
+
+        for (let i = 0; i <= nums.length - 8; i++) {
+            if (nums[i] === s1 && nums[i+1] === s2) {
+                // Lấy 8 số
+                let d = nums.slice(i, i + 8);
+                // Định dạng: XX - XX XX XX
+                let formatted = `${d[0]}${d[1]} - ${d[2]}${d[3]} ${d[4]}${d[5]} ${d[6]}${d[7]}`;
+                results.push(formatted);
+            }
+        }
+
+        const textArea = document.getElementById('extractedText');
+        if (results.length > 0) {
+            textArea.value = results.join('\n');
+            processData(rawData); // Cập nhật cả bảng hiển thị
+        } else {
+            textArea.value = "Không tìm thấy dãy nào!";
+        }
+    }
+
     function processData(content) {
         const nums = content.replace(/\D/g, '').split('').map(Number);
         if (nums.length === 0) return;
@@ -140,11 +195,11 @@
         const isA = (n) => n >= 5; 
         const isB = (n) => n < 5; 
 
+        // Nhận diện mẫu 9 số
         for (let i = 0; i <= nums.length - 9; i++) {
             let match = false;
-            // 4 Mẫu: aab-bababa, bab-ababab, aba-bababa, bba-ababab
             if (isA(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
-            else if (isB(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
+            else if (isB(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && i+3 < nums.length && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
             else if (isA(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
             else if (isB(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
 
@@ -155,6 +210,7 @@
             }
         }
 
+        // Đánh dấu vị trí tìm kiếm
         if (searchTarget.length === 2) {
             const s1 = parseInt(searchTarget[0]);
             const s2 = parseInt(searchTarget[1]);
@@ -180,6 +236,14 @@
         document.getElementById('result').innerHTML = html;
     }
 
+    function copyExtracted() {
+        const textArea = document.getElementById('extractedText');
+        if (!textArea.value) return;
+        textArea.select();
+        document.execCommand('copy');
+        alert("Đã sao chép các dãy số!");
+    }
+
     async function exportResults() {
         const resultArea = document.getElementById('result');
         try {
@@ -189,13 +253,13 @@
             });
             const link = document.createElement('a');
             link.href = canvas.toDataURL("image/png");
-            link.download = `Analyzer-Export-${Date.now()}.png`;
+            link.download = `Export-${Date.now()}.png`;
             link.click();
         } catch (err) { console.error(err); }
     }
 
     function clearData() {
-        if(confirm("Hành động này sẽ xóa toàn bộ lịch sử đã lưu. Bạn chắc chứ?")) {
+        if(confirm("Xóa toàn bộ dữ liệu đã lưu?")) {
             localStorage.clear();
             location.reload();
         }
