@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyzer v23.0 - N-Right Layout</title>
+    <title>Analyzer v24.0 - 3-Tier Layout</title>
     <style>
         :root {
             --bg-body: #0a0a0a;
@@ -18,100 +18,95 @@
         }
 
         body { font-family: 'Consolas', 'Monaco', monospace; padding: 10px; background: var(--bg-body); color: var(--text-main); margin: 0; }
-        .container { max-width: 950px; margin: auto; background: var(--bg-container); padding: 15px; border-radius: 12px; border: 1px solid #333; }
+        .container { max-width: 600px; margin: auto; background: var(--bg-container); padding: 15px; border-radius: 12px; border: 1px solid #333; }
         
-        .top-controls { 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            gap: 15px; 
-            background: var(--surface); 
-            padding: 10px 15px; 
-            border-radius: 8px; 
-            margin-bottom: 10px; 
-            border: 1px solid #444;
-            flex-wrap: wrap;
+        /* HÀNG 1: UPLOAD FILE */
+        .row-file {
+            background: var(--surface); padding: 10px; border-radius: 8px; 
+            margin-bottom: 10px; border: 1px solid #444; display: flex; justify-content: space-between; align-items: center;
         }
 
-        .input-section { display: flex; align-items: center; gap: 12px; }
-        
-        /* Các ô hiển thị MM và Ab */
-        .display-group { display: flex; align-items: center; gap: 5px; background: #000; padding: 5px 10px; border-radius: 6px; border: 1px solid #333; }
-        .label-sm { font-size: 0.75rem; color: #666; text-transform: uppercase; }
-        
-        input.readonly-pad { 
-            background: transparent; border: none; color: var(--secondary); 
-            width: 50px; text-align: center; font-size: 1.4rem; font-weight: bold; 
-            pointer-events: none; outline: none;
+        /* HÀNG 2: HIỂN THỊ MM & Ab */
+        .row-display {
+            background: var(--surface); padding: 15px; border-radius: 8px;
+            margin-bottom: 10px; border: 1px solid #444; display: flex; justify-content: center; gap: 20px;
         }
+        .display-item { text-align: center; }
+        .display-item label { display: block; font-size: 0.7rem; color: #666; margin-bottom: 4px; }
+        .val-box { background: #000; color: var(--secondary); padding: 8px 15px; border-radius: 6px; font-size: 1.6rem; font-weight: bold; min-width: 60px; display: inline-block; border: 1px solid #333; }
 
-        /* Ô nhập N chính - Nằm bên phải */
-        .n-box { display: flex; align-items: center; gap: 8px; border-left: 1px solid #444; padding-left: 15px; }
-        input.n-input {
-            background: #222; border: 2px solid var(--primary); color: #fff;
-            padding: 8px; border-radius: 6px; width: 50px; text-align: center;
-            font-size: 1.6rem; font-weight: bold; outline: none; box-shadow: 0 0 10px rgba(187, 134, 252, 0.2);
+        /* HÀNG 3: THỐNG KÊ (TRÁI) & NHẬP N (PHẢI) */
+        .row-input-group {
+            display: flex; gap: 10px; margin-bottom: 15px; align-items: stretch;
         }
-
-        .mini-counters { 
-            display: flex; gap: 15px; background: #000; padding: 10px 15px; 
-            border-radius: 6px; border: 1px solid #333; font-weight: bold; font-size: 1.2rem;
+        
+        .counter-box {
+            flex: 1; background: #000; border: 1px solid #444; border-radius: 8px;
+            padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; gap: 5px;
         }
+        .counter-line { font-weight: bold; font-size: 1.1rem; display: flex; justify-content: space-between; }
         .c-yellow { color: var(--warning); }
         .c-blue { color: var(--blue-light); }
 
+        .n-input-wrapper {
+            background: var(--surface); border: 2px solid var(--primary); border-radius: 8px;
+            padding: 10px 20px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .n-input-wrapper label { font-size: 0.7rem; color: var(--primary); margin-bottom: 5px; font-weight: bold; }
+        input.n-input {
+            background: transparent; border: none; color: #fff; width: 50px; 
+            text-align: center; font-size: 2rem; font-weight: bold; outline: none;
+        }
+
+        /* KHU VỰC KẾT QUẢ */
         #extractedText {
-            width: 100%; height: 500px; background: #000; color: var(--secondary);
+            width: 100%; height: 400px; background: #000; color: var(--secondary);
             border: 1px solid #444; border-radius: 8px; padding: 12px;
             font-family: 'Consolas', monospace; font-size: 1.3rem; resize: vertical; line-height: 1.5;
-            box-sizing: border-box; margin-top: 5px;
+            box-sizing: border-box;
         }
 
         .copy-btn { background: var(--success); color: white; width: 100%; margin-top: 10px; padding: 15px; font-size: 1.1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .clear-btn { background: #444; color: #aaa; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-        .stats-footer { display: flex; gap: 15px; margin-top: 10px; font-size: 0.8rem; color: #555; }
+        .clear-btn { background: #444; color: #aaa; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="top-controls">
-        <div class="input-section">
-            <div class="display-group">
-                <span class="label-sm">MM</span>
-                <input type="text" id="inputMM" class="readonly-pad" value="--" readonly>
-                <span style="color:#333">|</span>
-                <span class="label-sm">Ab</span>
-                <input type="text" id="inputAb" class="readonly-pad" value="--" readonly>
-            </div>
-
-            <div class="n-box">
-                <b style="color:var(--primary); font-size: 0.9rem;">NHẬP:</b>
-                <input type="tel" id="inputN" class="n-input" placeholder="?" maxlength="1" inputmode="numeric" autocomplete="off">
-            </div>
-        </div>
-
-        <div class="mini-counters">
-            <span class="c-yellow">🟡 <span id="countYellow">0</span></span>
-            <span class="c-blue">🔵 <span id="countBlue">0</span></span>
-        </div>
-        
-        <button class="clear-btn" onclick="clearData()">Xóa nhớ</button>
+    <div class="row-file">
+        <input type="file" id="fileInput" accept=".txt" style="font-size: 0.8rem; color: #888;">
+        <button class="clear-btn" onclick="clearData()">Xóa bộ nhớ</button>
     </div>
 
-    <div style="display: flex; justify-content: space-between; padding: 0 5px; margin-bottom: 5px;">
-        <input type="file" id="fileInput" accept=".txt" style="font-size: 0.8rem; color: #555;">
-        <span style="font-size: 0.75rem; color: #444;">Gõ số vào ô vuông để dịch trái ➔➔</span>
+    <div class="row-display">
+        <div class="display-item">
+            <label>MM</label>
+            <div id="mmVal" class="val-box">--</div>
+        </div>
+        <div class="display-item">
+            <label>Ab</label>
+            <div id="abVal" class="val-box">--</div>
+        </div>
+    </div>
+
+    <div class="row-input-group">
+        <div class="counter-box">
+            <div class="counter-line c-yellow">
+                <span>🟡 Lớn:</span> <span id="countYellow">0</span>
+            </div>
+            <div class="counter-line c-blue">
+                <span>🔵 Nhỏ:</span> <span id="countBlue">0</span>
+            </div>
+        </div>
+        <div class="n-input-wrapper">
+            <label>NHẬP N</label>
+            <input type="tel" id="inputN" class="n-input" placeholder="?" maxlength="1" inputmode="numeric" autocomplete="off">
+        </div>
     </div>
     
-    <textarea id="extractedText" readonly placeholder="Kết quả sẽ tự cập nhật khi bạn gõ số vào ô NHẬP..."></textarea>
+    <textarea id="extractedText" readonly placeholder="Kết quả trích xuất..."></textarea>
     
     <button class="copy-btn" onclick="copyExtracted()">SAO CHÉP KẾT QUẢ</button>
-
-    <div class="stats-footer">
-        <span>Tổng chữ số: <b id="totalCount" style="color:#888">0</b></span>
-        <span>Mẫu 9 số: <b id="groupCount" style="color:#888">0</b></span>
-    </div>
 </div>
 
 <script>
@@ -120,19 +115,14 @@
     let currentNumbers = []; 
 
     const nInput = document.getElementById('inputN');
-    const mmDisplay = document.getElementById('inputMM');
-    const abDisplay = document.getElementById('inputAb');
+    const mmBox = document.getElementById('mmVal');
+    const abBox = document.getElementById('abVal');
 
     window.onload = () => {
         rawData = localStorage.getItem(STORAGE_KEY) || "";
-        if(rawData) processData(rawData);
         nInput.focus();
-        
-        // Giữ focus ô N khi bấm ra ngoài
         document.addEventListener('click', (e) => {
-            if (e.target.id !== 'fileInput' && e.target.className !== 'copy-btn') {
-                nInput.focus();
-            }
+            if (e.target.id !== 'fileInput' && e.target.className !== 'copy-btn') nInput.focus();
         });
     };
 
@@ -148,21 +138,17 @@
                 extractSequences();
             }
         }
-        this.value = ""; // Xóa ô N ngay lập tức
+        this.value = "";
     });
 
     function updateDisplay() {
-        // currentNumbers: [M1, M2, A1, A2]
-        let m1 = currentNumbers[currentNumbers.length - 4] || "-";
-        let m2 = currentNumbers[currentNumbers.length - 3] || "-";
-        let a1 = currentNumbers[currentNumbers.length - 2] || "-";
-        let a2 = currentNumbers[currentNumbers.length - 1] || "-";
+        let m1 = currentNumbers[currentNumbers.length - 4] || "";
+        let m2 = currentNumbers[currentNumbers.length - 3] || "";
+        let a1 = currentNumbers[currentNumbers.length - 2] || "";
+        let a2 = currentNumbers[currentNumbers.length - 1] || "";
 
-        mmDisplay.value = (m1 + m2).replace(/-/g, "");
-        abDisplay.value = (a1 + a2).replace(/-/g, "");
-        
-        if (mmDisplay.value === "") mmDisplay.value = "--";
-        if (abDisplay.value === "") abDisplay.value = "--";
+        mmBox.innerText = (m1 + m2) || "--";
+        abBox.innerText = (a1 + a2) || "--";
     }
 
     document.getElementById('fileInput').addEventListener('change', async function(e) {
@@ -170,18 +156,18 @@
         if (!file) return;
         rawData = await file.text();
         localStorage.setItem(STORAGE_KEY, rawData);
-        processData(rawData);
+        alert("Đã nạp file thành công!");
         currentNumbers = [];
         updateDisplay();
         nInput.focus();
     });
 
     function extractSequences() {
-        const mm = mmDisplay.value;
-        const ab = abDisplay.value;
+        const mm = mmBox.innerText;
+        const ab = abBox.innerText;
         const textArea = document.getElementById('extractedText');
 
-        if (mm.length < 2 || ab.length < 2) return;
+        if (mm === "--" || ab === "--") return;
 
         const nums = rawData.replace(/\D/g, '').split('').map(Number);
         let blocks = { AA: [], AB: [], BB: [], BA: [] };
@@ -209,31 +195,10 @@
         
         textArea.value = blocks[target].length > 0 
             ? `[ KHỐI ${target} ] (MM:${mm} Ab:${ab})\n` + blocks[target].join('\n') 
-            : `KHÔNG CÓ DỮ LIỆU KHỐI ${target} CHO MM:${mm} Ab:${ab}`;
+            : `KHÔNG CÓ DỮ LIỆU KHỐI ${target}`;
 
-        updateCounters(textArea.value);
-    }
-
-    function updateCounters(text) {
-        document.getElementById('countYellow').innerText = (text.match(/🟡/g) || []).length;
-        document.getElementById('countBlue').innerText = (text.match(/🔵/g) || []).length;
-    }
-
-    function processData(content) {
-        const nums = content.replace(/\D/g, '').split('').map(Number);
-        if (nums.length === 0) return;
-        let groupCount = 0;
-        const isA = (n) => n >= 5, isB = (n) => n < 5;
-        for (let i = 0; i <= nums.length - 9; i++) {
-            let match = false;
-            if (isA(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
-            else if (isB(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
-            else if (isA(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
-            else if (isB(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
-            if (match) { groupCount++; i += 8; }
-        }
-        document.getElementById('totalCount').innerText = nums.length.toLocaleString();
-        document.getElementById('groupCount').innerText = groupCount.toLocaleString();
+        document.getElementById('countYellow').innerText = (textArea.value.match(/🟡/g) || []).length;
+        document.getElementById('countBlue').innerText = (textArea.value.match(/🔵/g) || []).length;
     }
 
     function copyExtracted() {
@@ -245,7 +210,7 @@
     }
 
     function clearData() {
-        if(confirm("Xóa sạch dữ liệu?")) {
+        if(confirm("Xóa toàn bộ dữ liệu?")) {
             localStorage.clear();
             location.reload();
         }
