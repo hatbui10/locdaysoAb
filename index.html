@@ -162,35 +162,57 @@
 
     // HÀM CHÍNH ĐỂ CẮT DÃY SỐ THEO YÊU CẦU - ĐÃ SỬA THEO MẪU: 61 - 25 15 35
     function extractSequences() {
-        searchTarget = document.getElementById('searchInput').value.trim();
-        if (searchTarget.length !== 2) {
-            alert("Vui lòng nhập đúng 2 số cần tìm!");
-            return;
-        }
+    searchTarget = document.getElementById('searchInput').value.trim();
+    if (searchTarget.length !== 2) {
+        alert("Vui lòng nhập đúng 2 số cần tìm!");
+        return;
+    }
 
-        const nums = rawData.replace(/\D/g, '').split('').map(Number);
-        const s1 = parseInt(searchTarget[0]);
-        const s2 = parseInt(searchTarget[1]);
-        let results = [];
+    const nums = rawData.replace(/\D/g, '').split('').map(Number);
+    const s1 = parseInt(searchTarget[0]);
+    const s2 = parseInt(searchTarget[1]);
 
-        for (let i = 0; i <= nums.length - 8; i++) {
-            if (nums[i] === s1 && nums[i+1] === s2) {
-                // Lấy 8 số
-                let d = nums.slice(i, i + 8);
-                // Định dạng: XX - XX XX XX
-                let formatted = `${d[0]}${d[1]} - ${d[2]}${d[3]} ${d[4]}${d[5]} ${d[6]}${d[7]}`;
-                results.push(formatted);
-            }
-        }
+    // Khởi tạo 4 khối
+    let blocks = {
+        AA: [],
+        AB: [],
+        BB: [],
+        BA: []
+    };
 
-        const textArea = document.getElementById('extractedText');
-        if (results.length > 0) {
-            textArea.value = results.join('\n');
-            processData(rawData); // Cập nhật cả bảng hiển thị
-        } else {
-            textArea.value = "Không tìm thấy dãy nào!";
+    const isA = (n) => n >= 5;
+    const isB = (n) => n < 5;
+
+    for (let i = 0; i <= nums.length - 8; i++) {
+        if (nums[i] === s1 && nums[i+1] === s2) {
+            let d = nums.slice(i, i + 8);
+            // Định dạng: XX - XX - XX XX
+            let formatted = `${d[0]}${d[1]} - ${d[2]}${d[3]} - ${d[4]}${d[5]} ${d[6]}${d[7]}`;
+            
+            // Phân loại dựa trên d[2] và d[3]
+            if (isA(d[2]) && isA(d[3])) blocks.AA.push(formatted);
+            else if (isA(d[2]) && isB(d[3])) blocks.AB.push(formatted);
+            else if (isB(d[2]) && isB(d[3])) blocks.BB.push(formatted);
+            else if (isB(d[2]) && isA(d[3])) blocks.BA.push(formatted);
         }
     }
+
+    // Gộp kết quả hiển thị
+    let finalOutput = "";
+    if (blocks.AA.length > 0) finalOutput += `--- KHỐI AA (>=5 >=5) ---\n${blocks.AA.join('\n')}\n\n`;
+    if (blocks.AB.length > 0) finalOutput += `--- KHỐI AB (>=5 <5) ---\n${blocks.AB.join('\n')}\n\n`;
+    if (blocks.BB.length > 0) finalOutput += `--- KHỐI BB (<5 <5) ---\n${blocks.BB.join('\n')}\n\n`;
+    if (blocks.BA.length > 0) finalOutput += `--- KHỐI BA (<5 >=5) ---\n${blocks.BA.join('\n')}\n\n`;
+
+    const textArea = document.getElementById('extractedText');
+    if (finalOutput !== "") {
+        textArea.value = finalOutput.trim();
+        processData(rawData); 
+    } else {
+        textArea.value = "Không tìm thấy dãy nào!";
+    }
+    }
+    
 
     function processData(content) {
         const nums = content.replace(/\D/g, '').split('').map(Number);
