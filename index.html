@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VN168 PRO - Hiển Thị Tên File</title>
+    <title>VN168 PRO - CỘNG DỒN FILE</title>
     <style>
         :root {
             --neon-cyan: #00f3ff;
-            --neon-pink: #ff0055;
             --neon-yellow: #ffff00;
             --neon-blue: #0088ff;
             --bg-dark: #050505;
-            --card-bg: #111114;
+            --card-bg: #111;
         }
 
         body {
             background-color: var(--bg-dark);
             color: #fff;
             font-family: 'Segoe UI', sans-serif;
-            margin: 30px 3px 0 3px;
+            margin: 30px 3px 0 3px; /* Quy tắc 3 cạnh */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -30,223 +29,229 @@
             background: var(--card-bg);
             border: 1px solid #222;
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+            padding: 15px;
             box-sizing: border-box;
         }
 
-        h2 {
-            text-align: center;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 15px var(--neon-cyan);
-            margin-top: 0;
-            letter-spacing: 4px;
-            font-size: 1.5rem;
+        h2 { text-align: center; color: var(--neon-cyan); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px;}
+
+        .file-zone {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
-        /* Khu vực Upload */
-        .btn-upload {
-            display: block;
-            min-height: 50px;
+        .btn-select {
+            flex: 1;
+            padding: 15px;
             background: #1a1a1a;
             border: 1px dashed #444;
             text-align: center;
-            padding: 10px;
             cursor: pointer;
             border-radius: 8px;
-            color: #aaa;
-            margin-bottom: 20px;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            word-break: break-all;
-        }
-        .btn-upload:hover {
-            border-color: var(--neon-cyan);
-            background: rgba(0, 243, 255, 0.05);
-        }
-
-        /* Ô nhập số */
-        input[type="number"] {
-            width: 100%;
-            padding: 18px;
-            background: #000;
-            border: 1px solid #333;
-            border-radius: 10px;
             color: var(--neon-cyan);
-            font-size: 24px;
             font-weight: bold;
-            text-align: center;
-            box-sizing: border-box;
-            outline: none;
-            margin-bottom: 15px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,1);
+            font-size: 13px;
         }
 
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        button {
+        .btn-run {
+            width: 100%;
             padding: 15px;
+            background: var(--neon-cyan);
+            color: #000;
+            border: none;
             border-radius: 8px;
-            cursor: pointer;
             font-weight: bold;
-            border: 1px solid transparent;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
         }
 
-        .btn-filter { background: var(--neon-cyan); color: #000; }
-        .btn-download { background: transparent; border-color: var(--neon-pink); color: var(--neon-pink); }
-        .btn-download:hover { background: var(--neon-pink); color: #fff; }
-
-        /* Kết quả */
-        #resultContainer {
-            margin-top: 20px;
+        .file-list-info {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 15px;
             background: #000;
-            border-radius: 10px;
+            padding: 8px;
+            border-radius: 5px;
             border: 1px solid #222;
-            max-height: 450px;
-            overflow-y: auto;
         }
 
-        .result-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #151515;
-            font-family: 'Consolas', monospace;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .stat-box {
+            background: #000;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #222;
+        }
+
+        .p1-c { color: var(--neon-yellow); }
+        .p2-c { color: var(--neon-blue); }
+        .p3-c { color: #888; }
+
+        .display-list {
+            background: #000;
+            border: 1px solid #222;
+            border-radius: 8px;
+            height: 220px;
+            overflow-y: auto;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
             font-size: 18px;
+            font-weight: bold;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .header-row {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 12px;
         }
 
-        .color-yellow { color: var(--neon-yellow) !important; text-shadow: 0 0 8px rgba(255,255,0,0.4); }
-        .color-blue { color: var(--neon-blue) !important; text-shadow: 0 0 8px rgba(0,136,255,0.4); }
-        .match-val { color: var(--neon-pink); font-weight: bold; }
-        .sequence-val { color: #666; letter-spacing: 1px; }
+        .btn-dl {
+            background: transparent;
+            border: 1px solid;
+            padding: 3px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 5px; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>VN168 <span style="color: #fff;">PRO</span></h2>
-    
-    <label class="btn-upload" id="uploadLabel">
-        <input type="file" id="fileInput" style="display:none" accept=".txt">
-        <span id="fileNameDisplay">BẤM ĐỂ TẢI FILE (.TXT)</span>
-    </label>
+    <h2>VN168 - GỘP FILE & XỬ LÝ</h2>
 
-    <input type="number" id="searchInput" inputmode="numeric" placeholder="NHẬP SỐ" autofocus>
-
-    <div class="button-group">
-        <button class="btn-filter" onclick="handleFilter()">LỌC DỮ LIỆU</button>
-        <button class="btn-download" onclick="downloadResult()">TẢI KẾT QUẢ</button>
+    <div class="file-zone">
+        <label class="btn-select">
+            <input type="file" id="fileInput" style="display:none" accept=".txt" multiple>
+            + CHỌN THÊM FILE
+        </label>
+        <button class="btn-select" style="border-color: #ff4444; color: #ff4444;" onclick="resetAll()">LÀM MỚI</button>
     </div>
 
-    <div id="resultContainer"></div>
+    <div class="file-list-info" id="fileStatus">Chưa có file nào được chọn.</div>
+
+    <button class="btn-run" onclick="startProcessing()">BẮT ĐẦU XỬ LÝ TẤT CẢ</button>
+
+    <div class="stats-grid">
+        <div class="stat-box"><div class="p1-c">P1 (6A)</div><div id="countP1">0</div></div>
+        <div class="stat-box"><div class="p2-c">P2 (6b)</div><div id="countP2">0</div></div>
+        <div class="stat-box"><div class="p3-c">P3 (TG)</div><div id="countP3">0</div></div>
+    </div>
+
+    <div class="header-row p1-c">DANH SÁCH P1 <button class="btn-dl p1-c" onclick="downloadPart('p1')">TẢI</button></div>
+    <div class="display-list p1-c" id="listP1"></div>
+
+    <div class="header-row p2-c">DANH SÁCH P2 <button class="btn-dl p2-c" onclick="downloadPart('p2')">TẢI</button></div>
+    <div class="display-list p2-c" id="listP2"></div>
+
+    <div class="header-row p3-c">DANH SÁCH P3 <button class="btn-dl p3-c" onclick="downloadPart('p3')">TẢI</button></div>
+    <div class="display-list p3-c" id="listP3"></div>
 </div>
 
 <script>
-    let rawData = localStorage.getItem('vn168_data') || "";
-    let lastResults = [];
+    let combinedData = ""; // Biến chứa dữ liệu cộng dồn
+    let fileCount = 0;
+    let results = { p1: [], p2: [], p3: [] };
 
-    // Tự động load khi mở trang
-    window.onload = () => {
-        const savedFileName = localStorage.getItem('vn168_filename');
-        if (rawData && savedFileName) {
-            updateFileNameUI(savedFileName);
-        }
-        document.getElementById('searchInput').focus();
-    };
-
-    // Hàm cập nhật chữ trên nút Upload
-    function updateFileNameUI(name) {
-        const display = document.getElementById('fileNameDisplay');
-        display.innerText = "FILE: " + name;
-        display.style.color = "var(--neon-cyan)";
-        display.style.fontWeight = "bold";
-    }
-
-    // Xử lý chọn file mới
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
+        const files = e.target.files;
+        if (files.length === 0) return;
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            rawData = e.target.result.replace(/\s+/g, '');
-            // Lưu cả dữ liệu và tên file vào bộ nhớ máy
-            localStorage.setItem('vn168_data', rawData);
-            localStorage.setItem('vn168_filename', file.name);
-            
-            updateFileNameUI(file.name);
-        };
-        reader.readAsText(file);
+        fileCount += files.length;
+        document.getElementById('fileStatus').innerText = `Đã cộng dồn: ${fileCount} file. Sẵn sàng xử lý...`;
+
+        for (let file of files) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                // Cộng dồn nội dung vào biến chung
+                combinedData += event.target.result.replace(/\s+/g, '');
+            };
+            reader.readAsText(file);
+        }
     });
 
-    function checkPattern(str) {
-        if (str.length < 6) return "";
-        const numbers = str.substring(0, 6).split('').map(Number);
-        if (numbers.every(n => n >= 5)) return "color-yellow";
-        if (numbers.every(n => n < 5)) return "color-blue";
-        return "";
-    }
-
-    function handleFilter() {
-        const searchVal = document.getElementById('searchInput').value;
-        const container = document.getElementById('resultContainer');
+    function startProcessing() {
+        if (!combinedData) return alert("Vui lòng chọn file trước!");
         
-        if (!rawData) return alert("Vui lòng tải file dữ liệu trước!");
-        if (!searchVal) return;
+        results = { p1: [], p2: [], p3: [] };
+        document.getElementById('fileStatus').innerText = "Đang xử lý dữ liệu tổng hợp...";
 
-        let resultsHTML = "";
-        lastResults = [];
-        let pos = rawData.indexOf(searchVal);
-
-        while (pos !== -1) {
-            let nextTen = rawData.substring(pos + searchVal.length, pos + searchVal.length + 10);
+        // Quét từ 000-999
+        for (let i = 0; i <= 999; i++) {
+            let xxx = i.toString().padStart(3, '0');
+            let pos = combinedData.indexOf(xxx);
             
-            if (nextTen.length > 0) {
-                const colorClass = checkPattern(nextTen);
-                let f = nextTen;
-                if (nextTen.length === 10) {
-                    f = `${nextTen.substring(0,3)} ${nextTen.substring(3,6)} ${nextTen.substring(6,10)}`;
+            if (pos === -1) continue;
+
+            let isP1 = false;
+            let isP2 = false;
+
+            // Kiểm tra TẤT CẢ các vị trí của xxx trong dữ liệu gộp
+            let currentPos = pos;
+            while (currentPos !== -1) {
+                let nextSix = combinedData.substring(currentPos + 3, currentPos + 9);
+                if (nextSix.length === 6) {
+                    let nums = nextSix.split('').map(Number);
+                    if (nums.every(n => n >= 5)) isP1 = true;
+                    if (nums.every(n => n < 5)) isP2 = true;
                 }
-                
-                lastResults.push(`${searchVal} ${f}`);
-                resultsHTML += `
-                    <div class="result-item">
-                        <span class="match-val">${searchVal}</span>
-                        <span class="sequence-val ${colorClass}">${f}</span>
-                    </div>`;
+                currentPos = combinedData.indexOf(xxx, currentPos + 1);
             }
-            pos = rawData.indexOf(searchVal, pos + 1);
+
+            // Phân loại ưu tiên
+            if (isP1) results.p1.push(xxx);
+            else if (isP2) results.p2.push(xxx);
+            else results.p3.push(xxx);
         }
 
-        container.innerHTML = resultsHTML || '<div style="padding:20px; color:red; text-align:center;">KHÔNG TÌM THẤY</div>';
-        document.getElementById('searchInput').select();
+        updateUI();
+        document.getElementById('fileStatus').innerText = `Hoàn tất xử lý ${fileCount} file!`;
     }
 
-    function downloadResult() {
-        if (lastResults.length === 0) return alert("Không có kết quả để tải!");
-        const content = lastResults.join("\n");
-        const blob = new Blob([content], { type: 'text/plain' });
+    function updateUI() {
+        document.getElementById('countP1').innerText = results.p1.length;
+        document.getElementById('countP2').innerText = results.p2.length;
+        document.getElementById('countP3').innerText = results.p3.length;
+
+        document.getElementById('listP1').innerText = results.p1.join('\n');
+        document.getElementById('listP2').innerText = results.p2.join('\n');
+        document.getElementById('listP3').innerText = results.p3.join('\n');
+    }
+
+    function resetAll() {
+        combinedData = "";
+        fileCount = 0;
+        results = { p1: [], p2: [], p3: [] };
+        document.getElementById('fileStatus').innerText = "Đã làm mới bộ nhớ.";
+        updateUI();
+    }
+
+    function downloadPart(name) {
+        if (results[name].length === 0) return;
+        const blob = new Blob([results[name].join('\n')], { type: 'text/plain' });
         const a = document.createElement('a');
-        const time = new Date().toLocaleTimeString().replace(/:/g, '-');
-        a.href = window.URL.createObjectURL(blob);
-        a.download = `KetQua_${time}.txt`;
+        a.href = URL.createObjectURL(blob);
+        a.download = `VN168_GOP_${name.toUpperCase()}.txt`;
         a.click();
     }
-
-    document.getElementById('searchInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') handleFilter();
-    });
 </script>
 
 </body>
