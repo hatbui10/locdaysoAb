@@ -3,273 +3,285 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyzer v31.0 - Auto Focus Fixed</title>
+    <title>VN168 PRO - Siêu Bộ Lọc</title>
     <style>
         :root {
-            --bg-body: #0a0a0a;
-            --bg-container: #161616;
-            --text-main: #e0e0e0;
-            --primary: #bb86fc;
-            --secondary: #03dac6;
-            --surface: #222222;
-            --success: #4caf50;
-            --warning: #ff9800;
-            --blue-light: #03a9f4;
+            --neon-cyan: #00f3ff;
+            --neon-pink: #ff0055;
+            --bg-dark: #050505;
+            --card-bg: #0f0f12;
+            --text-gray: #b0b0b0;
         }
 
-        body { font-family: 'Consolas', monospace; padding: 10px; background: var(--bg-body); color: var(--text-main); margin: 0; }
-        .container { max-width: 650px; margin: auto; background: var(--bg-container); padding: 15px; border-radius: 12px; border: 1px solid #333; }
-        
-        .row-file { background: var(--surface); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; display: flex; justify-content: space-between; align-items: center; }
-        .row-display { background: #000; padding: 12px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #444; display: flex; justify-content: space-evenly; }
-        .display-item { text-align: center; }
-        .display-item label { display: block; font-size: 0.75rem; color: #888; margin-bottom: 5px; }
-        .val-box { color: var(--secondary); font-size: 1.8rem; font-weight: bold; }
-
-        .row-action { display: flex; gap: 8px; margin-bottom: 10px; height: 85px; }
-        .box-stats { flex: 1.5; background: #1a1a1a; border: 1px solid #444; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; justify-content: center; }
-        .stat-line { font-weight: bold; font-size: 0.9rem; display: flex; justify-content: space-between; }
-        .c-yellow { color: var(--warning); }
-        .c-blue { color: var(--blue-light); }
-
-        .box-input { flex: 1; background: var(--surface); border: 2px solid var(--primary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .box-input label { font-size: 0.6rem; color: var(--primary); font-weight: bold; margin-bottom: 2px; }
-        /* Thêm hiệu ứng focus rõ ràng hơn */
-        .box-input:focus-within { border-color: #fff; box-shadow: 0 0 10px var(--primary); }
-        
-        .n-input { background: transparent; border: none; color: #fff; width: 100%; text-align: center; font-size: 2rem; font-weight: bold; outline: none; }
-
-        .box-range { flex: 1; background: var(--surface); border: 1px solid var(--secondary); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .box-range label { font-size: 0.6rem; color: var(--secondary); font-weight: bold; margin-bottom: 2px; }
-        .range-input { background: transparent; border: none; color: var(--secondary); width: 100%; text-align: center; font-size: 1.8rem; font-weight: bold; outline: none; }
-
-        .result-wrapper { display: flex; gap: 10px; margin-bottom: 10px; }
-        .text-group { flex: 1; display: flex; flex-direction: column; }
-        .text-group label { font-size: 0.7rem; color: #888; margin-bottom: 4px; font-weight: bold; }
-        
-        textarea {
-            width: 100%; height: 350px; background: #000; color: var(--secondary);
-            border: 1px solid #444; border-radius: 8px; padding: 8px;
-            font-size: 1.1rem; resize: none; line-height: 1.4; box-sizing: border-box;
+        /* Quy tắc 3 cạnh: Top 30px, Sides 3px */
+        @page { margin: 0; }
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 30px 3px 0 3px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
-        #sortedText { color: #fff; border-color: var(--secondary); }
 
-        .copy-btn { background: var(--success); color: white; width: 100%; padding: 12px; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .clear-btn { background: #444; color: #aaa; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; }
-        
-        .footer-stats { margin-top: 15px; padding-top: 10px; border-top: 1px dashed #333; display: flex; justify-content: space-between; font-size: 0.75rem; color: #666; }
-        .footer-stats b { color: #888; }
+        .container {
+            width: 100%;
+            max-width: 550px;
+            background: var(--card-bg);
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hiệu ứng viền neon phía trên */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-cyan), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.2rem;
+            letter-spacing: 3px;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 10px var(--neon-cyan);
+            margin-top: 0;
+        }
+
+        .control-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* Nút Upload */
+        .btn-upload {
+            position: relative;
+            height: 45px;
+            background: #1a1a1a;
+            border: 1px dashed #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 6px;
+            color: var(--text-gray);
+            transition: 0.3s;
+        }
+        .btn-upload:hover {
+            border-color: var(--neon-cyan);
+            color: #fff;
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        /* Ô nhập số */
+        .input-wrapper {
+            position: relative;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            background: #000;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: var(--neon-cyan);
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+        input[type="number"]:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
+
+        /* Nút bấm */
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-filter {
+            background: var(--neon-cyan);
+            color: #000;
+        }
+        .btn-filter:active { transform: scale(0.95); }
+
+        .btn-download {
+            background: transparent;
+            border-color: var(--neon-pink);
+            color: var(--neon-pink);
+        }
+        .btn-download:hover {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: 0 0 15px var(--neon-pink);
+        }
+
+        /* Vùng kết quả */
+        #resultContainer {
+            margin-top: 20px;
+            background: #000;
+            border-radius: 8px;
+            border: 1px solid #222;
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .result-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #111;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 17px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .match-val { color: var(--neon-pink); font-weight: bold; }
+        .sequence-val { color: var(--text-gray); letter-spacing: 1px; }
+
+        /* Scrollbar tinh tế */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="row-file">
-        <input type="file" id="fileInput" accept=".txt" style="width: 60%; font-size: 0.7rem;">
-        <button class="clear-btn" onclick="clearData()">Xóa nhớ</button>
-    </div>
-
-    <div class="row-display">
-        <div class="display-item">
-            <label>Mặt MM</label>
-            <div id="mmVal" class="val-box">--</div>
-        </div>
-        <div style="width:1px; background:#333; margin: 10px 0;"></div>
-        <div class="display-item">
-            <label>Mặt Ab Nhập</label>
-            <div id="abVal" class="val-box">--</div>
-        </div>
-    </div>
-
-    <div class="row-action">
-        <div class="box-stats">
-            <div class="stat-line c-yellow"><span>🟡 AAA:</span> <span id="countYellow">0</span></div>
-            <div class="stat-line c-blue" style="margin-top: 5px;"><span>🔵 bbb:</span> <span id="countBlue">0</span></div>
-        </div>
-        
-        <div class="box-input">
-
-            <input type="tel" id="inputN" class="n-input" placeholder="?" maxlength="1" inputmode="numeric" autocomplete="off" autofocus>
-        </div>
-
-        <div class="box-range">
-            <label>PHẠM VI ±</label>
-            <input type="number" id="inputRange" class="range-input" value="7" min="0" max="99">
-        </div>
-    </div>
+    <h2>VN168 <span style="color: #fff;">PRO</span></h2>
     
-    <div class="result-wrapper">
-        <div class="text-group" style="display: none;">
-    <label>DỮ LIỆU GỐC (MM)</label>
-    <textarea id="extractedText" readonly></textarea>
-</div>
-        <div class="text-group">
-            <label>PHẠM VI ± (GẦN NHẤT)</label>
-            <textarea id="sortedText" readonly></textarea>
+    <div class="control-panel">
+        <label class="btn-upload">
+            <input type="file" id="fileInput" style="display:none" accept=".txt">
+            <span id="fileName">Tải file dữ liệu lên</span>
+        </label>
+
+        <div class="input-wrapper">
+            <input type="number" id="searchInput" 
+                   inputmode="numeric" 
+                   placeholder="NHẬP SỐ CẦN LỌC" 
+                   autofocus>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-filter" onclick="handleFilter()">LỌC NGAY</button>
+            <button class="btn-download" onclick="downloadResult()">TẢI TXT</button>
         </div>
     </div>
-    
-    <button class="copy-btn" onclick="copyExtracted()">SAO CHÉP KẾT QUẢ ƯU TIÊN</button>
 
-    <div class="footer-stats">
-        <span>Dữ liệu file: <b id="totalCount">0</b> số</span>
-        <span>Mẫu 9 số: <b id="groupCount">0</b></span>
+    <div id="resultContainer">
+        <div style="padding: 20px; color: #444; text-align: center;">Chưa có kết quả</div>
     </div>
 </div>
 
 <script>
-    const STORAGE_KEY = 'sequence_analyzer_data';
-    let rawData = "";
-    let currentNumbers = []; 
-
-    const nInput = document.getElementById('inputN');
-    const rangeInput = document.getElementById('inputRange');
-    const mmBox = document.getElementById('mmVal');
-    const abBox = document.getElementById('abVal');
-
-    // HÀM FOCUS MẠNH
-    function forceFocus() {
-        setTimeout(() => {
-            nInput.focus();
-            // Một số trình duyệt cần click nhẹ để cho phép focus
-        }, 100);
-    }
+    let rawData = localStorage.getItem('vn168_data') || "";
+    let lastResults = []; // Lưu trữ kết quả hiện tại để tải về
 
     window.onload = () => {
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        if (savedData) {
-            rawData = savedData;
-            processFileStats(rawData);
+        if(rawData) {
+            document.getElementById('fileName').innerText = "Dữ liệu đã sẵn sàng";
+            document.getElementById('fileName').style.color = "var(--neon-cyan)";
         }
-        forceFocus();
+        document.getElementById('searchInput').focus();
     };
 
-    // Khi người dùng click bất kỳ đâu trên trang, tự động trả focus về ô nhập N
-    document.addEventListener('click', (e) => {
-        // Nếu không phải đang bấm vào nút copy hay chọn file thì mới focus
-        if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
-            nInput.focus();
-        }
-    });
-
-    rangeInput.addEventListener('input', () => {
-        if (currentNumbers.length === 4) extractSequences();
-    });
-
-    nInput.addEventListener('input', function() {
-        const val = this.value.trim();
-        if (val !== "" && !isNaN(val)) {
-            currentNumbers.push(val);
-            if (currentNumbers.length > 4) currentNumbers.shift();
-            updateDisplay();
-            if (currentNumbers.length === 4) extractSequences();
-        }
-        this.value = "";
-    });
-
-    function updateDisplay() {
-        let m1 = currentNumbers[currentNumbers.length - 4] || "";
-        let m2 = currentNumbers[currentNumbers.length - 3] || "";
-        let a1 = currentNumbers[currentNumbers.length - 2] || "";
-        let a2 = currentNumbers[currentNumbers.length - 1] || "";
-        mmBox.innerText = (m1 + m2) || "--";
-        abBox.innerText = (a1 + a2) || "--";
-    }
-
-    document.getElementById('fileInput').addEventListener('change', async function(e) {
+    // Đọc file
+    document.getElementById('fileInput').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-        rawData = await file.text();
-        localStorage.setItem(STORAGE_KEY, rawData);
-        processFileStats(rawData);
-        currentNumbers = [];
-        updateDisplay();
-        nInput.focus();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            rawData = e.target.result.replace(/\s+/g, ''); // Nén chuỗi
+            localStorage.setItem('vn168_data', rawData);
+            document.getElementById('fileName').innerText = "Đã nạp: " + file.name;
+            document.getElementById('fileName').style.color = "var(--neon-cyan)";
+        };
+        reader.readAsText(file);
     });
 
-    function processFileStats(content) {
-        const nums = content.replace(/\D/g, '').split('').map(Number);
-        if (nums.length === 0) return;
+    function handleFilter() {
+        const searchVal = document.getElementById('searchInput').value;
+        const container = document.getElementById('resultContainer');
         
-        let groupCount = 0;
-        const isA = (n) => n >= 5, isB = (n) => n < 5;
-        
-        for (let i = 0; i <= nums.length - 9; i++) {
-            let match = false;
-            if (isA(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
-            else if (isB(nums[i]) && isA(nums[i+1]) && isB(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
-            else if (isA(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isB(nums[i+3]) && isA(nums[i+4]) && isB(nums[i+5]) && isA(nums[i+6]) && isB(nums[i+7]) && isA(nums[i+8])) match = true;
-            else if (isB(nums[i]) && isB(nums[i+1]) && isA(nums[i+2]) && isA(nums[i+3]) && isB(nums[i+4]) && isA(nums[i+5]) && isB(nums[i+6]) && isA(nums[i+7]) && isB(nums[i+8])) match = true;
-            if (match) { groupCount++; i += 8; }
-        }
-        
-        document.getElementById('totalCount').innerText = nums.length.toLocaleString();
-        document.getElementById('groupCount').innerText = groupCount.toLocaleString();
-    }
+        if (!rawData) return alert("Bạn chưa tải file dữ liệu!");
+        if (!searchVal) return;
 
-    function extractSequences() {
-        const mm = mmBox.innerText;
-        const abInputStr = abBox.innerText;
-        const abInputVal = parseInt(abInputStr);
-        const userRange = parseInt(rangeInput.value) || 0;
+        let resultsHTML = "";
+        lastResults = []; // Reset bộ nhớ tải về
+        let pos = rawData.indexOf(searchVal);
 
-        const areaNormal = document.getElementById('extractedText');
-        const areaSorted = document.getElementById('sortedText');
-        
-        if (mm === "--" || abInputStr === "--") return;
-
-        const nums = rawData.replace(/\D/g, '').split('').map(Number);
-        let allMatches = [];
-        const isA = (n) => n >= 5;
-        const isB = (n) => n < 5;
-
-        for (let i = 0; i <= nums.length - 8; i++) {
-            if (nums[i] === parseInt(mm[0]) && nums[i+1] === parseInt(mm[1])) {
-                let d = nums.slice(i, i + 8);
-                let currentAb = parseInt(`${d[2]}${d[3]}`);
-                let lastFour = d.slice(4);
-                let colorTag = "⚪ ";
-                if (lastFour.every(n => isA(n))) colorTag = "🟡 ";
-                else if (lastFour.every(n => isB(n))) colorTag = "🔵 ";
-
-                allMatches.push({
-                    ab: currentAb,
-                    fullStr: `${colorTag}${d[0]}${d[1]}-${d[2]}${d[3]}-${d[4]}${d[5]} ${d[6]}${d[7]}`,
-                    diff: Math.abs(currentAb - abInputVal)
-                });
+        while (pos !== -1) {
+            let nextTen = rawData.substring(pos + searchVal.length, pos + searchVal.length + 10);
+            
+            if (nextTen.length > 0) {
+                // Định dạng hiển thị
+                let f = nextTen;
+                if (nextTen.length === 10) {
+                    f = `${nextTen.substring(0,3)} ${nextTen.substring(3,6)} ${nextTen.substring(6,10)}`;
+                }
+                
+                lastResults.push(`${searchVal} ${f}`); // Lưu bản text để tải về
+                resultsHTML += `
+                    <div class="result-item">
+                        <span class="match-val">${searchVal}</span>
+                        <span class="sequence-val">${f}</span>
+                    </div>`;
             }
+            pos = rawData.indexOf(searchVal, pos + 1);
         }
 
-        areaNormal.value = allMatches.length > 0 
-            ? `[ TẤT CẢ MM:${mm} ]\n` + allMatches.map(m => m.fullStr).join('\n')
-            : "Trống";
-
-        let filteredRange = allMatches.filter(m => m.diff <= userRange);
-        let sorted = filteredRange.sort((a, b) => a.diff - b.diff);
-
-        areaSorted.value = sorted.length > 0
-            ? `[ PHẠM VI ±${userRange} ]\n` + sorted.map(m => m.fullStr).join('\n')
-            : `TRỐNG (±${userRange})`;
-
-        document.getElementById('countYellow').innerText = (areaSorted.value.match(/🟡/g) || []).length;
-        document.getElementById('countBlue').innerText = (areaSorted.value.match(/🔵/g) || []).length;
+        container.innerHTML = resultsHTML || '<div style="padding:20px; color:red; text-align:center;">Không tìm thấy!</div>';
+        document.getElementById('searchInput').select();
     }
 
-    function copyExtracted() {
-        const textArea = document.getElementById('sortedText');
-        if (!textArea.value) return;
-        textArea.select();
-        document.execCommand('copy');
-        alert("Đã copy!");
-        nInput.focus(); // Sau khi copy xong trả focus lại ngay
+    // Chức năng tải file TXT
+    function downloadResult() {
+        if (lastResults.length === 0) return alert("Không có dữ liệu để tải!");
+        
+        const content = lastResults.join("\n");
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        
+        const timestamp = new Date().toLocaleTimeString().replace(/:/g, '-');
+        a.href = url;
+        a.download = `KetQua_Loc_${timestamp}.txt`;
+        a.click();
+        window.URL.revokeObjectURL(url);
     }
 
-    function clearData() {
-        if(confirm("Xóa bộ nhớ?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    }
+    // Enter để lọc nhanh
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleFilter();
+    });
 </script>
+
 </body>
 </html>
