@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Trích Xuất </title>
+    <title>Tool Trích Xuất & Phân Loại</title>
     <style>
         :root {
             --bg: #121212;
             --card: #1e1e1e;
             --text: #e0e0e0;
             --accent: #ffeb3b;
+            --blue: #00d4ff;
             --border: #444;
         }
 
@@ -91,6 +92,29 @@
             white-space: pre-wrap;
             color: #00ff00;
             font-size: 18px;
+            line-height: 1.8;
+        }
+
+        /* Tô vàng cho nhóm Lớn */
+        .highlight-big {
+            background-color: var(--accent);
+            color: #000;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* Tô xanh cho nhóm Nhỏ */
+        .highlight-small {
+            background-color: var(--blue);
+            color: #000;
+            font-weight: bold;
+            padding: 2px 5px;
+            border-radius: 3px;
+            display: inline-block;
+            width: 100%;
         }
 
         .clear-btn {
@@ -131,28 +155,23 @@
 <script>
     let combinedData = "";
 
-    // 1. Khởi tạo khi tải trang
     window.onload = function() {
-        // Khôi phục dữ liệu file
         const savedData = localStorage.getItem('myFileData');
         if (savedData) {
             combinedData = savedData;
-            document.getElementById('file-info').innerText = "Đã khôi phục dữ liệu từ bộ nhớ.";
+            document.getElementById('file-info').innerText = "Đã khôi phục dữ liệu.";
             document.getElementById('file-info').style.color = "#4caf50";
         }
-
-        // Khôi phục chế độ ô (mặc định là 1)
         const savedMode = localStorage.getItem('myMode') || 1;
         updateMode(parseInt(savedMode));
     };
 
-    // 2. Xử lý nạp file và lưu LocalStorage
     document.getElementById('fileInput').addEventListener('change', function(e) {
         Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (ev) => { 
                 combinedData += ev.target.result + "\n"; 
-                localStorage.setItem('myFileData', combinedData); // Lưu lại
+                localStorage.setItem('myFileData', combinedData);
                 document.getElementById('file-info').innerText = "Đã tải & lưu dữ liệu!";
                 document.getElementById('file-info').style.color = "#4caf50";
             };
@@ -160,29 +179,24 @@
         });
     });
 
-    // 3. Xử lý xóa dữ liệu
     function clearAllData() {
-        if(confirm("Bạn có chắc muốn xóa sạch dữ liệu file đã lưu?")) {
+        if(confirm("Xóa sạch dữ liệu đã lưu?")) {
             localStorage.clear();
             combinedData = "";
             location.reload();
         }
     }
 
-    // 4. Tạo ô nhập
     function updateMode(n) {
-        localStorage.setItem('myMode', n); // Lưu chế độ ô
+        localStorage.setItem('myMode', n);
         const container = document.getElementById('input-container');
         container.innerHTML = "";
-        
         [1,2,3].forEach(i => document.getElementById('m'+i).className = (i==n ? 'active' : ''));
-
         for (let i = 0; i < n; i++) {
             const inp = document.createElement('input');
             inp.type = "number";
             inp.inputMode = "numeric";
             inp.className = "single-input";
-            
             inp.addEventListener('input', function() {
                 if (this.value.length > 1) this.value = this.value.slice(-1);
                 if (this.value.length === 1) {
@@ -190,46 +204,51 @@
                     if (next) next.focus();
                 }
             });
-
             inp.addEventListener('keydown', function(e) {
                 if (e.key === "Backspace" && this.value === "") {
                     const prev = this.previousElementSibling;
                     if (prev) prev.focus();
                 }
             });
-
             container.appendChild(inp);
         }
-
-        setTimeout(() => {
-            const firstInp = container.querySelector('input');
-            if (firstInp) firstInp.focus();
-        }, 100);
     }
 
-    // 5. Tìm kiếm
     function runFilter() {
         const inputs = document.querySelectorAll('.single-input');
         const ab = Array.from(inputs).map(i => i.value).join("");
         const resBox = document.getElementById('result');
         
-        if (!combinedData) { alert("Chưa có dữ liệu! Hãy tải file."); return; }
-        if (ab === "") { alert("Vui lòng nhập số!"); return; }
+        if (!combinedData) { alert("Chưa có dữ liệu!"); return; }
+        if (ab === "" || ab.length < inputs.length) { alert("Nhập đủ số!"); return; }
 
-        let finalLines = [];
+        let finalHTML = [];
         let pos = 0;
+        let cleanData = combinedData.replace(/\s+/g, '');
 
-        while ((pos = combinedData.indexOf(ab, pos)) !== -1) {
-            let segment = combinedData.substring(pos, pos + ab.length + 8);
-            let extra = segment.substring(ab.length); 
-            let p1 = extra.substring(0, 4);
-            let p2 = extra.substring(4, 8);
+        while ((pos = cleanData.indexOf(ab, pos)) !== -1) {
+            let p1 = cleanData.substring(pos + ab.length, pos + ab.length + 4);
+            let p2 = cleanData.substring(pos + ab.length + 4, pos + ab.length + 8);
             
-            finalLines.push(`${ab}-${p1} ${p2}`);
+            if (p1.length === 4) {
+                let digits = p1.split('').map(Number);
+                let isAllSmall = digits.every(d => d < 5);
+                let isAllBig = digits.every(d => d >= 5);
+
+                let line = `${ab}-${p1} ${p2}`;
+
+                if (isAllSmall) {
+                    finalHTML.push(`<span class="highlight-small">${line}</span>`);
+                } else if (isAllBig) {
+                    finalHTML.push(`<span class="highlight-big">${line}</span>`);
+                } else {
+                    finalHTML.push(line);
+                }
+            }
             pos += 1;
         }
 
-        resBox.innerText = finalLines.length > 0 ? finalLines.join('\n') : "Không tìm thấy chuỗi '" + ab + "'";
+        resBox.innerHTML = finalHTML.length > 0 ? finalHTML.join('\n') : "Không tìm thấy chuỗi '" + ab + "'";
     }
 </script>
 
