@@ -3,255 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VN168 PRO - CỘNG DỒN FILE</title>
+    <title>Tool Trích Xuất 1 Chữ Số</title>
     <style>
         :root {
-            --neon-cyan: #00f3ff;
-            --neon-yellow: #ffff00;
-            --neon-blue: #0088ff;
-            --bg-dark: #050505;
-            --card-bg: #111;
+            --bg: #121212;
+            --card: #1e1e1e;
+            --text: #e0e0e0;
+            --accent: #ffeb3b;
+            --border: #444;
         }
 
         body {
-            background-color: var(--bg-dark);
-            color: #fff;
-            font-family: 'Segoe UI', sans-serif;
-            margin: 30px 3px 0 3px; /* Quy tắc 3 cạnh */
+            font-family: sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 15px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
         }
 
         .container {
             width: 100%;
-            max-width: 550px;
-            background: var(--card-bg);
-            border: 1px solid #222;
+            max-width: 400px;
+            background: var(--card);
+            padding: 20px;
             border-radius: 12px;
-            padding: 15px;
-            box-sizing: border-box;
+            border: 1px solid var(--border);
         }
 
-        h2 { text-align: center; color: var(--neon-cyan); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 15px;}
-
-        .file-zone {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .btn-select {
-            flex: 1;
-            padding: 15px;
-            background: #1a1a1a;
-            border: 1px dashed #444;
-            text-align: center;
-            cursor: pointer;
-            border-radius: 8px;
-            color: var(--neon-cyan);
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .btn-run {
-            width: 100%;
-            padding: 15px;
-            background: var(--neon-cyan);
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-        }
-
-        .file-list-info {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 15px;
-            background: #000;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #222;
-        }
-
-        .stats-grid {
+        .selector-btns {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
         }
 
-        .stat-box {
-            background: #000;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            border: 1px solid #222;
-        }
-
-        .p1-c { color: var(--neon-yellow); }
-        .p2-c { color: var(--neon-blue); }
-        .p3-c { color: #888; }
-
-        .display-list {
-            background: #000;
-            border: 1px solid #222;
-            border-radius: 8px;
-            height: 220px;
-            overflow-y: auto;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 18px;
+        button {
+            padding: 12px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 6px;
             font-weight: bold;
-            white-space: pre-wrap;
-            line-height: 1.5;
-            margin-bottom: 15px;
-            text-align: center;
         }
 
-        .header-row {
+        button.active {
+            background: var(--accent);
+            color: #000;
+        }
+
+        #input-container {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 5px;
-            font-size: 12px;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .btn-dl {
-            background: transparent;
-            border: 1px solid;
-            padding: 3px 8px;
-            border-radius: 4px;
-            cursor: pointer;
+        input[type="number"] {
+            width: 60px;
+            height: 60px;
+            background: #252525;
+            border: 2px solid var(--border);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 28px;
+            text-align: center;
+            caret-color: var(--accent);
         }
 
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #333; }
+        input[type="number"]:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            background: #252525;
+            color: #888;
+            border: 1px dashed #555;
+            border-radius: 6px;
+        }
+
+        #result {
+            margin-top: 20px;
+            background: #000;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent);
+            min-height: 100px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            color: #00ff00;
+            font-size: 18px;
+        }
+
+        .label { font-size: 11px; color: #777; margin-bottom: 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>VN168 - GỘP FILE & XỬ LÝ</h2>
+    <div class="label">Bước 1: Chọn File nguồn</div>
+    <input type="file" id="fileInput" multiple accept=".txt">
 
-    <div class="file-zone">
-        <label class="btn-select">
-            <input type="file" id="fileInput" style="display:none" accept=".txt" multiple>
-            + CHỌN THÊM FILE
-        </label>
-        <button class="btn-select" style="border-color: #ff4444; color: #ff4444;" onclick="resetAll()">LÀM MỚI</button>
+    <div class="label">Bước 2: Chọn số lượng chữ số</div>
+    <div class="selector-btns">
+        <button onclick="updateMode(1)" id="m1">1 Ô</button>
+        <button onclick="updateMode(2)" id="m2">2 Ô</button>
+        <button onclick="updateMode(3)" id="m3">3 Ô</button>
     </div>
 
-    <div class="file-list-info" id="fileStatus">Chưa có file nào được chọn.</div>
+    <div id="input-container"></div>
 
-    <button class="btn-run" onclick="startProcessing()">BẮT ĐẦU XỬ LÝ TẤT CẢ</button>
+    <button onclick="runFilter()" style="width:100%; background: var(--accent); color: black; padding: 15px; border-radius: 8px; font-weight: bold; border: none;">XUẤT DỮ LIỆU</button>
 
-    <div class="stats-grid">
-        <div class="stat-box"><div class="p1-c">P1 (6A)</div><div id="countP1">0</div></div>
-        <div class="stat-box"><div class="p2-c">P2 (6b)</div><div id="countP2">0</div></div>
-        <div class="stat-box"><div class="p3-c">P3 (TG)</div><div id="countP3">0</div></div>
-    </div>
-
-    <div class="header-row p1-c">DANH SÁCH P1 <button class="btn-dl p1-c" onclick="downloadPart('p1')">TẢI</button></div>
-    <div class="display-list p1-c" id="listP1"></div>
-
-    <div class="header-row p2-c">DANH SÁCH P2 <button class="btn-dl p2-c" onclick="downloadPart('p2')">TẢI</button></div>
-    <div class="display-list p2-c" id="listP2"></div>
-
-    <div class="header-row p3-c">DANH SÁCH P3 <button class="btn-dl p3-c" onclick="downloadPart('p3')">TẢI</button></div>
-    <div class="display-list p3-c" id="listP3"></div>
+    <div id="result">Đang chờ nhập...</div>
 </div>
 
 <script>
-    let combinedData = ""; // Biến chứa dữ liệu cộng dồn
-    let fileCount = 0;
-    let results = { p1: [], p2: [], p3: [] };
+    let combinedData = "";
 
+    // Đọc file cộng dồn
     document.getElementById('fileInput').addEventListener('change', function(e) {
-        const files = e.target.files;
-        if (files.length === 0) return;
-
-        fileCount += files.length;
-        document.getElementById('fileStatus').innerText = `Đã cộng dồn: ${fileCount} file. Sẵn sàng xử lý...`;
-
-        for (let file of files) {
+        Array.from(e.target.files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                // Cộng dồn nội dung vào biến chung
-                combinedData += event.target.result.replace(/\s+/g, '');
-            };
+            reader.onload = (ev) => { combinedData += ev.target.result + "\n"; };
             reader.readAsText(file);
-        }
+        });
     });
 
-    function startProcessing() {
-        if (!combinedData) return alert("Vui lòng chọn file trước!");
+    function updateMode(n) {
+        const container = document.getElementById('input-container');
+        container.innerHTML = "";
         
-        results = { p1: [], p2: [], p3: [] };
-        document.getElementById('fileStatus').innerText = "Đang xử lý dữ liệu tổng hợp...";
+        [1,2,3].forEach(i => document.getElementById('m'+i).className = (i==n ? 'active' : ''));
 
-        // Quét từ 000-999
-        for (let i = 0; i <= 999; i++) {
-            let xxx = i.toString().padStart(3, '0');
-            let pos = combinedData.indexOf(xxx);
+        for (let i = 0; i < n; i++) {
+            const inp = document.createElement('input');
+            inp.type = "number";
+            inp.pattern = "[0-9]*";
+            inp.inputMode = "numeric";
+            inp.className = "single-input";
             
-            if (pos === -1) continue;
-
-            let isP1 = false;
-            let isP2 = false;
-
-            // Kiểm tra TẤT CẢ các vị trí của xxx trong dữ liệu gộp
-            let currentPos = pos;
-            while (currentPos !== -1) {
-                let nextSix = combinedData.substring(currentPos + 3, currentPos + 9);
-                if (nextSix.length === 6) {
-                    let nums = nextSix.split('').map(Number);
-                    if (nums.every(n => n >= 5)) isP1 = true;
-                    if (nums.every(n => n < 5)) isP2 = true;
+            // Xử lý chỉ nhập 1 số và tự nhảy
+            inp.addEventListener('input', function() {
+                if (this.value.length > 1) {
+                    this.value = this.value.slice(-1); // Chỉ giữ lại số cuối cùng vừa nhập
                 }
-                currentPos = combinedData.indexOf(xxx, currentPos + 1);
-            }
+                if (this.value.length === 1) {
+                    const next = this.nextElementSibling;
+                    if (next) next.focus();
+                }
+            });
 
-            // Phân loại ưu tiên
-            if (isP1) results.p1.push(xxx);
-            else if (isP2) results.p2.push(xxx);
-            else results.p3.push(xxx);
+            // Hỗ trợ xóa (backspace) quay lại ô trước
+            inp.addEventListener('keydown', function(e) {
+                if (e.key === "Backspace" && this.value === "") {
+                    const prev = this.previousElementSibling;
+                    if (prev) prev.focus();
+                }
+            });
+
+            container.appendChild(inp);
         }
 
-        updateUI();
-        document.getElementById('fileStatus').innerText = `Hoàn tất xử lý ${fileCount} file!`;
+        // Tự động focus vào ô đầu tiên khi đổi chế độ
+        setTimeout(() => {
+            const firstInp = container.querySelector('input');
+            if (firstInp) firstInp.focus();
+        }, 50);
     }
 
-    function updateUI() {
-        document.getElementById('countP1').innerText = results.p1.length;
-        document.getElementById('countP2').innerText = results.p2.length;
-        document.getElementById('countP3').innerText = results.p3.length;
+    function runFilter() {
+        const inputs = document.querySelectorAll('.single-input');
+        // Gộp tất cả các ô lại thành 1 chuỗi duy nhất (ví dụ: ô1=9, ô2=6 => "96")
+        const ab = Array.from(inputs).map(i => i.value).join("");
+        const resBox = document.getElementById('result');
+        
+        if (!combinedData) { alert("Chưa có dữ liệu file!"); return; }
+        if (ab === "") { alert("Vui lòng nhập số!"); return; }
 
-        document.getElementById('listP1').innerText = results.p1.join('\n');
-        document.getElementById('listP2').innerText = results.p2.join('\n');
-        document.getElementById('listP3').innerText = results.p3.join('\n');
+        let finalLines = [];
+        let pos = 0;
+
+        // Tìm chuỗi ab trong dữ liệu
+        while ((pos = combinedData.indexOf(ab, pos)) !== -1) {
+            let segment = combinedData.substring(pos, pos + ab.length + 8);
+            
+            // Lấy 8 ký tự phía sau
+            let extra = segment.substring(ab.length); 
+            let p1 = extra.substring(0, 4);
+            let p2 = extra.substring(4, 8);
+            
+            // Kết quả: 2 số nhập ở đầu tiên + 8 số sau
+            finalLines.push(`${ab}-${p1} ${p2}`);
+            pos += 1; // Tìm tiếp các vị trí trùng lặp khác
+        }
+
+        resBox.innerText = finalLines.length > 0 ? finalLines.join('\n') : "Không tìm thấy chuỗi '" + ab + "' trong file.";
     }
 
-    function resetAll() {
-        combinedData = "";
-        fileCount = 0;
-        results = { p1: [], p2: [], p3: [] };
-        document.getElementById('fileStatus').innerText = "Đã làm mới bộ nhớ.";
-        updateUI();
-    }
-
-    function downloadPart(name) {
-        if (results[name].length === 0) return;
-        const blob = new Blob([results[name].join('\n')], { type: 'text/plain' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `VN168_GOP_${name.toUpperCase()}.txt`;
-        a.click();
-    }
+    // Mặc định
+    updateMode(1);
 </script>
 
 </body>
