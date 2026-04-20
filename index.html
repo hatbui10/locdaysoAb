@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tool Trích Xuất & Phân Loại (Lọc Trùng)</title>
+    <title>Tool Trích Xuất & Phân Loại</title>
     <style>
         :root {
             --bg: #121212;
@@ -95,24 +95,12 @@
             line-height: 1.8;
         }
 
-        .highlight-big {
+        .highlight-yellow {
             background-color: var(--accent);
             color: #000;
             font-weight: bold;
-            padding: 2px 5px;
+            padding: 0px 4px;
             border-radius: 3px;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .highlight-small {
-            background-color: var(--blue);
-            color: #000;
-            font-weight: bold;
-            padding: 2px 5px;
-            border-radius: 3px;
-            display: inline-block;
-            width: 100%;
         }
 
         .clear-btn {
@@ -220,37 +208,52 @@
         if (!combinedData) { alert("Chưa có dữ liệu!"); return; }
         if (ab === "" || ab.length < inputs.length) { alert("Nhập đủ số!"); return; }
 
-        let resultSet = new Set(); // Sử dụng Set để tự động lọc trùng
+        let resultSet = new Set();
         let pos = 0;
         let cleanData = combinedData.replace(/\s+/g, '');
 
         while ((pos = cleanData.indexOf(ab, pos)) !== -1) {
-            let p1 = cleanData.substring(pos + ab.length, pos + ab.length + 4);
-            let p2 = cleanData.substring(pos + ab.length + 4, pos + ab.length + 8);
+            let bIndex = pos + ab.length;
+            let bChar = cleanData.charAt(bIndex);
             
-            if (p1.length === 4) {
-                let digits = p1.split('').map(Number);
-                let isAllSmall = digits.every(d => d < 5);
-                let isAllBig = digits.every(d => d >= 5);
-
-                let lineContent = `${ab}-${p1} ${p2}`;
-                let formattedLine = "";
-
-                if (isAllSmall) {
-                    formattedLine = `<span class="highlight-small">${lineContent}</span>`;
-                } else if (isAllBig) {
-                    formattedLine = `<span class="highlight-big">${lineContent}</span>`;
-                } else {
-                    formattedLine = lineContent;
-                }
+            if (bChar !== "") {
+                let bVal = parseInt(bChar);
+                let x5Str = cleanData.substring(bIndex + 1, bIndex + 6);
                 
-                // Thêm vào Set (Set sẽ bỏ qua nếu formattedLine đã tồn tại)
-                resultSet.add(formattedLine);
+                if (x5Str.length === 5) {
+                    let d = x5Str.split('').map(Number);
+                    let isSatisfied = false;
+
+                    if (bVal >= 5) {
+                        // Nhóm b >= 5
+                        // KHÔNG tô màu nếu: (Ít nhất d1 hoặc d2 >= 5) HOẶC (Ít nhất d3, d4 hoặc d5 < 5)
+                        let cond1 = (d[0] >= 5 || d[1] >= 5);
+                        let cond2 = (d[2] < 5 || d[3] < 5 || d[4] < 5);
+                        if (cond1 || cond2) isSatisfied = true;
+                    } else {
+                        // Nhóm b < 5
+                        // KHÔNG tô màu nếu: (Ít nhất d1 hoặc d2 < 5) HOẶC (Ít nhất d3, d4 hoặc d5 >= 5)
+                        let cond1 = (d[0] < 5 || d[1] < 5);
+                        let cond2 = (d[2] >= 5 || d[3] >= 5 || d[4] >= 5);
+                        if (cond1 || cond2) isSatisfied = true;
+                    }
+
+                    let p3 = cleanData.substring(bIndex + 1, bIndex + 4); 
+                    let p4 = cleanData.substring(bIndex + 4, bIndex + 8); 
+                    
+                    let lineOutput = "";
+                    if (isSatisfied) {
+                        lineOutput = `${ab}-${bChar}${p3} ${p4}`;
+                    } else {
+                        lineOutput = `${ab}-${bChar}<span class="highlight-yellow">${x5Str}</span>${cleanData.substring(bIndex + 6, bIndex + 8)}`;
+                    }
+                    
+                    resultSet.add(lineOutput);
+                }
             }
             pos += 1;
         }
 
-        // Chuyển Set thành mảng và hiển thị
         const finalArray = Array.from(resultSet);
         resBox.innerHTML = finalArray.length > 0 ? finalArray.join('\n') : "Không tìm thấy chuỗi '" + ab + "'";
     }
