@@ -10,9 +10,9 @@
             --card: #1e1e1e;
             --text: #e0e0e0;
             --accent: #ffeb3b;
-            --blue-bg: #007bff; /* Nền xanh dương */
-            --orange-bg: #ff9800; /* Nền cam */
             --border: #444;
+            --blue-hl: #007bff; /* Nền xanh dương */
+            --orange-hl: #ff9800; /* Nền cam */
         }
 
         body {
@@ -96,7 +96,6 @@
             line-height: 1.8;
         }
 
-        /* GIỮ NGUYÊN HIGHLIGHT VÀNG CŨ */
         .highlight-yellow {
             background-color: var(--accent);
             color: #000;
@@ -105,22 +104,9 @@
             border-radius: 3px;
         }
 
-        /* THÊM HIGHLIGHT MỚI CHO BCD */
-        .bg-blue {
-            background-color: var(--blue-bg);
-            color: #fff;
-            font-weight: bold;
-            padding: 0px 4px;
-            border-radius: 3px;
-        }
-
-        .bg-orange {
-            background-color: var(--orange-bg);
-            color: #000;
-            font-weight: bold;
-            padding: 0px 4px;
-            border-radius: 3px;
-        }
+        /* Logic highlight mới theo yêu cầu */
+        .bg-blue { background-color: var(--blue-hl); color: #fff; padding: 0 2px; border-radius: 2px; }
+        .bg-orange { background-color: var(--orange-hl); color: #000; padding: 0 2px; border-radius: 2px; }
 
         .clear-btn {
             background: #ff5252;
@@ -243,7 +229,7 @@
                     let d = x5Str.split('').map(Number);
                     let isSatisfied = false;
 
-                    // Giữ nguyên logic cũ cho highlight-yellow
+                    // Logic cũ giữ nguyên
                     if (bVal >= 5) {
                         let cond1 = (d[0] >= 5 || d[1] >= 5);
                         let cond2 = (d[2] < 5 || d[3] < 5 || d[4] < 5);
@@ -254,35 +240,30 @@
                         if (cond1 || cond2) isSatisfied = true;
                     }
 
-                    // --- LOGIC HIGHLIGHT BCD MỚI ---
-                    let cVal = d[0];
-                    let dVal = d[1];
+                    // --- BỔ SUNG LOGIC HIGHLIGHT CHO BCD ---
                     let bcdClass = "";
-                    
-                    if (bVal >= 5 && cVal < 5 && dVal < 5) {
+                    if (bVal >= 5 && d[0] < 5 && d[1] < 5) {
                         bcdClass = "bg-blue";
-                    } else if (bVal < 5 && cVal >= 5 && dVal >= 5) {
+                    } else if (bVal < 5 && d[0] >= 5 && d[1] >= 5) {
                         bcdClass = "bg-orange";
                     }
-                    
-                    let bText = bChar;
-                    let cdText = x5Str.substring(0, 2);
-                    let bcdPart = bcdClass ? `<span class="${bcdClass}">${bText}${cdText}</span>` : `${bText}${cdText}`;
-                    // -------------------------------
 
-                    let restOfX5 = x5Str.substring(2); 
+                    let bPart = bChar;
+                    let cPart = x5Str[0];
+                    let dPart = x5Str[1];
+                    let bcdDisplay = bcdClass ? `<span class="${bcdClass}">${bPart}${cPart}${dPart}</span>` : `${bPart}${cPart}${dPart}`;
+                    // ---------------------------------------
+
+                    let p3 = cleanData.substring(bIndex + 1, bIndex + 4); 
                     let p4 = cleanData.substring(bIndex + 4, bIndex + 8); 
                     
                     let lineOutput = "";
                     if (isSatisfied) {
-                        // Không có vàng, chỉ áp dụng Blue/Orange nếu thỏa mãn bcd
-                        lineOutput = `${ab}-${bcdPart}${restOfX5} ${p4}`;
+                        // Kết quả dạng: AB - bcd - e fghk (đúng 10 số như code gốc)
+                        lineOutput = `${ab}-${bcdDisplay}${x5Str[2]} ${p4}`;
                     } else {
-                        // Có highlight vàng cũ, lồng bcd vào đầu
-                        lineOutput = `${ab}-<span class="highlight-yellow">${bText}${x5Str}</span>${cleanData.substring(bIndex + 6, bIndex + 8)}`;
-                        
-                        // Nếu bạn muốn bcd đè lên cả màu vàng, có thể tùy biến thêm ở đây. 
-                        // Hiện tại code đang giữ format cũ khi rơi vào highlight-yellow.
+                        // Giữ nguyên logic tô màu vàng gốc
+                        lineOutput = `${ab}-${bChar}<span class="highlight-yellow">${x5Str}</span>${cleanData.substring(bIndex + 6, bIndex + 8)}`;
                     }
                     
                     resultSet.add(lineOutput);
