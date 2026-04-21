@@ -10,7 +10,8 @@
             --card: #1e1e1e;
             --text: #e0e0e0;
             --accent: #ffeb3b;
-            --blue: #00d4ff;
+            --blue-bg: #007bff; /* Nền xanh dương */
+            --orange-bg: #ff9800; /* Nền cam */
             --border: #444;
         }
 
@@ -95,8 +96,26 @@
             line-height: 1.8;
         }
 
+        /* GIỮ NGUYÊN HIGHLIGHT VÀNG CŨ */
         .highlight-yellow {
             background-color: var(--accent);
+            color: #000;
+            font-weight: bold;
+            padding: 0px 4px;
+            border-radius: 3px;
+        }
+
+        /* THÊM HIGHLIGHT MỚI CHO BCD */
+        .bg-blue {
+            background-color: var(--blue-bg);
+            color: #fff;
+            font-weight: bold;
+            padding: 0px 4px;
+            border-radius: 3px;
+        }
+
+        .bg-orange {
+            background-color: var(--orange-bg);
             color: #000;
             font-weight: bold;
             padding: 0px 4px;
@@ -224,28 +243,46 @@
                     let d = x5Str.split('').map(Number);
                     let isSatisfied = false;
 
+                    // Giữ nguyên logic cũ cho highlight-yellow
                     if (bVal >= 5) {
-                        // Nhóm b >= 5
-                        // KHÔNG tô màu nếu: (Ít nhất d1 hoặc d2 >= 5) HOẶC (Ít nhất d3, d4 hoặc d5 < 5)
                         let cond1 = (d[0] >= 5 || d[1] >= 5);
                         let cond2 = (d[2] < 5 || d[3] < 5 || d[4] < 5);
                         if (cond1 || cond2) isSatisfied = true;
                     } else {
-                        // Nhóm b < 5
-                        // KHÔNG tô màu nếu: (Ít nhất d1 hoặc d2 < 5) HOẶC (Ít nhất d3, d4 hoặc d5 >= 5)
                         let cond1 = (d[0] < 5 || d[1] < 5);
                         let cond2 = (d[2] >= 5 || d[3] >= 5 || d[4] >= 5);
                         if (cond1 || cond2) isSatisfied = true;
                     }
 
-                    let p3 = cleanData.substring(bIndex + 1, bIndex + 4); 
+                    // --- LOGIC HIGHLIGHT BCD MỚI ---
+                    let cVal = d[0];
+                    let dVal = d[1];
+                    let bcdClass = "";
+                    
+                    if (bVal >= 5 && cVal < 5 && dVal < 5) {
+                        bcdClass = "bg-blue";
+                    } else if (bVal < 5 && cVal >= 5 && dVal >= 5) {
+                        bcdClass = "bg-orange";
+                    }
+                    
+                    let bText = bChar;
+                    let cdText = x5Str.substring(0, 2);
+                    let bcdPart = bcdClass ? `<span class="${bcdClass}">${bText}${cdText}</span>` : `${bText}${cdText}`;
+                    // -------------------------------
+
+                    let restOfX5 = x5Str.substring(2); 
                     let p4 = cleanData.substring(bIndex + 4, bIndex + 8); 
                     
                     let lineOutput = "";
                     if (isSatisfied) {
-                        lineOutput = `${ab}-${bChar}${p3} ${p4}`;
+                        // Không có vàng, chỉ áp dụng Blue/Orange nếu thỏa mãn bcd
+                        lineOutput = `${ab}-${bcdPart}${restOfX5} ${p4}`;
                     } else {
-                        lineOutput = `${ab}-${bChar}<span class="highlight-yellow">${x5Str}</span>${cleanData.substring(bIndex + 6, bIndex + 8)}`;
+                        // Có highlight vàng cũ, lồng bcd vào đầu
+                        lineOutput = `${ab}-<span class="highlight-yellow">${bText}${x5Str}</span>${cleanData.substring(bIndex + 6, bIndex + 8)}`;
+                        
+                        // Nếu bạn muốn bcd đè lên cả màu vàng, có thể tùy biến thêm ở đây. 
+                        // Hiện tại code đang giữ format cũ khi rơi vào highlight-yellow.
                     }
                     
                     resultSet.add(lineOutput);
